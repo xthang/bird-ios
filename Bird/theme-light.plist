@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>textColor</key>
+	<string>2A4D69</string>
+	<key>backgroundColor</key>
+	<dict>
+		<key>red</key>
+		<integer>26</integer>
+		<key>green</key>
+		<integer>26</integer>
+		<key>blue</key>
+		<integer>26</integer>
+	</dict>
+	<key>popupBackgroundColor</key>
+	<string>f0f0f0</string>
+	<key>popupCornerRadiusRatio</key>
+	<real>0.1</real>
+	<key>popupShadowRadius</key>
+	<integer>20</integer>
+	<key>popupShadowColor</key>
+	<string>0</string>
+	<key>buttonBackgroundColor</key>
+	<string>e5e5e5</string>
+	<key>buttonTextColor</key>
+	<string>4B86B4</string>
+	<key>buttonPrimary1BackgroundColor</key>
+	<string>63ACE5</string>
+	<key>buttonPrimary1TextColor</key>
+	<string>ffffff</string>
+	<key>buttonHighlightedBackgroundColor</key>
+	<string>2ab7ca</string>
+	<key>buttonHighlightedTextColor</key>
+	<string>ffffff</string>
+	<key>buttonDisabledBackgroundColor</key>
+	<string>b3cde0</string>
+	<key>buttonDisabledTextColor</key>
+	<string></string>
+	<key>buttonCornerRadiusRatio</key>
+	<real>0.5</real>
+	<key>buttonShadowRadius</key>
+	<integer>3</integer>
+	<key>buttonShadowColor</key>
+	<string>1492FF</string>
+	<key>snackbarFont</key>
+	<string>Chalkboard SE</string>
+	<key>snackbarFontSize</key>
+	<integer>15</integer>
+</dict>
+</plist>

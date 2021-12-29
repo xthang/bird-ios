@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="Kiw-kO-sM4" customClass="SceneOverlay" customModule="X_Numbers" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lPN-J9-1dh">
+                    <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                    <subviews>
+                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="RLi-BI-eUy">
+                            <rect key="frame" x="103.5" y="683" width="207" height="68"/>
+                            <subviews>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yIU-bX-ZQd" customClass="SceneButton" customModule="X_Numbers" customModuleProvider="target">
+                                    <rect key="frame" x="0.0" y="0.0" width="207" height="30"/>
+                                    <color key="backgroundColor" red="0.8392156959" green="0.83742135760000003" blue="0.83742135760000003" alpha="1" colorSpace="deviceRGB"/>
+                                    <accessibility key="accessibilityConfiguration" identifier="Replay"/>
+                                    <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                    <state key="normal" title="Replay"/>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="u5i-DM-eHV" customClass="SceneButton" customModule="X_Numbers" customModuleProvider="target">
+                                    <rect key="frame" x="0.0" y="38" width="207" height="30"/>
+                                    <color key="backgroundColor" red="0.8392156959" green="0.83742135760000003" blue="0.83742135760000003" alpha="1" colorSpace="deviceRGB"/>
+                                    <accessibility key="accessibilityConfiguration" identifier="Home"/>
+                                    <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                    <state key="normal" title="Home"/>
+                                </button>
+                            </subviews>
+                        </stackView>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstItem="RLi-BI-eUy" firstAttribute="centerY" secondItem="lPN-J9-1dh" secondAttribute="centerY" multiplier="1.6" priority="999" id="44u-AJ-fWd"/>
+                        <constraint firstItem="RLi-BI-eUy" firstAttribute="bottom" relation="lessThanOrEqual" secondItem="lPN-J9-1dh" secondAttribute="bottom" constant="-70" id="DKD-fj-nVf"/>
+                        <constraint firstItem="RLi-BI-eUy" firstAttribute="width" secondItem="lPN-J9-1dh" secondAttribute="width" multiplier="0.5" id="hfI-q5-JQf"/>
+                        <constraint firstItem="RLi-BI-eUy" firstAttribute="centerX" secondItem="lPN-J9-1dh" secondAttribute="centerX" id="xA2-Ar-eVK"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="VAF-dD-q6d"/>
+            <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="lPN-J9-1dh" secondAttribute="bottom" id="5Q4-kw-FH9"/>
+                <constraint firstItem="lPN-J9-1dh" firstAttribute="top" secondItem="Kiw-kO-sM4" secondAttribute="top" id="dvm-dG-5u3"/>
+                <constraint firstItem="lPN-J9-1dh" firstAttribute="leading" secondItem="VAF-dD-q6d" secondAttribute="leading" id="h1V-cW-wPr"/>
+                <constraint firstItem="lPN-J9-1dh" firstAttribute="trailing" secondItem="VAF-dD-q6d" secondAttribute="trailing" id="j22-BP-4Nx"/>
+            </constraints>
+            <point key="canvasLocation" x="139" y="61"/>
+        </view>
+    </objects>
+</document>
