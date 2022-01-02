@@ -75,8 +75,15 @@ class GameViewController: UIViewController {
 				
 				skView.ignoresSiblingOrder = true
 				
-				// skView.showsFPS = true
-				// skView.showsNodeCount = true
+				skView.showsFPS = true
+				skView.showsDrawCount = true
+				skView.showsNodeCount = true
+				skView.showsQuadCount = true
+				skView.showsPhysics = true
+				skView.showsFields = true
+				if #available(iOS 13.0, *) {
+					skView.showsLargeContentViewer = true
+				}
 			}
 		}
 		
@@ -129,7 +136,7 @@ class GameViewController: UIViewController {
 			self.adInterstitial = AdInterstitial.shared
 		}
 		
-		if UserDefaults.standard.object(forKey: CommonConfig.Keys.welcomeBannerVersion) != nil {
+		if UserDefaults.standard.object(forKey: CommonConfig.Keys.welcomeVersion) != nil {
 			adsStatusChanged("viewDidAppear", !Helper.adsRemoved)
 		}
 	}

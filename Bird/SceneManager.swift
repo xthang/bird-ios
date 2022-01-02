@@ -10,7 +10,7 @@ class SceneManager {
 	
 	enum SceneIdentifier {
 		case home, end
-		case level
+		case game
 	}
 	
 	static func prepareScene(_ id: SceneIdentifier) {
@@ -19,7 +19,7 @@ class SceneManager {
 				_ = SKScene(fileNamed: "HomeScene")
 			case .end:
 				_ = SKScene(fileNamed: "EndScene")
-			case .level:
+			case .game:
 				_ = SKScene(fileNamed: "GameScene")
 		}
 	}

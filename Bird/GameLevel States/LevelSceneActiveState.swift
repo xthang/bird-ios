@@ -48,13 +48,19 @@ class LevelSceneActiveState: GKState {
 		// NSLog("--  LevelSceneActiveState | didEnter from: \(previousState as Any? ?? "--")")
 		super.didEnter(from: previousState)
 		
-		if previousState is LevelSceneSuccessState || previousState is LevelSceneFailState {
+		if previousState is LevelSceneFinishState {
 			timePassed = 0
 		}
 		
-		levelScene.timerNode.text = timePassedString
-		levelScene.gameState = .STARTED
+		// levelScene.timerNode.text = timePassedString
+		if levelScene.gameState == .PAUSED {
+			levelScene.gameState = .STARTED
+		}
+		
 		levelScene.setUserInteraction(true)
+		
+		levelScene.speed = 1
+		levelScene.physicsWorld.speed = 1
 	}
 	
 	override func update(deltaTime seconds: TimeInterval) {
@@ -64,20 +70,12 @@ class LevelSceneActiveState: GKState {
 		timePassed += seconds
 		
 		// Update the displayed time remaining.
-		levelScene.timerNode.text = timePassedString
-				
-		//if levelScene.currentLevel.state == .ENDED {
-		//	// If all the TaskBots are good, the player has completed the level.
-		//	stateMachine?.enter(LevelSceneSuccessState.self)
-		//} else if timeRemaining <= 0.0 {
-		//	// If there is no time remaining, the player has failed to complete the level.
-		//	stateMachine?.enter(LevelSceneFailState.self)
-		//}
+		// levelScene.timerNode.text = timePassedString
 	}
 	
 	override func isValidNextState(_ stateClass: AnyClass) -> Bool {
 		switch stateClass {
-			case is LevelScenePauseState.Type, is LevelSceneFailState.Type, is LevelSceneSuccessState.Type:
+			case is LevelScenePauseState.Type, is LevelSceneFinishState.Type:
 				return true
 			default:
 				return false

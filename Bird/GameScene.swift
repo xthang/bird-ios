@@ -8,12 +8,28 @@ import AVFoundation
 
 import XLibrary
 
+enum GameLayer: CGFloat {
+	case background = 0
+	case objects = 1
+	
+	enum ObjectLayer: CGFloat {
+		case sky = 0
+		case obstacle = 1
+		case ground = 20
+	}
+	
+	case mainCharacter = 10
+	case score = 80
+	case tutorial = 90
+	case navigation = 99
+}
+
 class GameScene: BaseScene {
 	
 	private let TAG = "🎰"
 	
 	enum State: Int {
-		case PREPARED, STARTED, PAUSED, ENDED
+		case PREPARED, STARTED, PAUSED, ENDED, FINISHED
 	}
 	enum Direction: String, CaseIterable {
 		case UP, DOWN, RIGHT, LEFT
@@ -29,92 +45,77 @@ class GameScene: BaseScene {
 	private lazy var stateMachine = GKStateMachine(states: [
 		LevelSceneActiveState(levelScene: self),
 		LevelScenePauseState(levelScene: self),
-		LevelSceneSuccessState(levelScene: self),
-		LevelSceneFailState(levelScene: self)
+		LevelSceneFinishState(levelScene: self)
 	])
 	
-	private lazy var navigation: SKNode! = childNode(withName: "Navigation")!
-	lazy var timerNode: SKLabelNode! = childNode(withName: "Time") as? SKLabelNode
+	private var score : Int = 0 {
+		didSet {
+			print("--  didSet score: \(score)")
+			scoreLabel.text = "\(score)"
+		}
+	}
 	
-	private lazy var levelNode = childNode(withName: "Level") as! SKLabelNode
+	// Calculation
+	private var GROUND_HEIGHT_ON_DISPLAY: CGFloat!
+	private var PIPE_WIDTH: CGFloat!
+	private var VERTICAL_PIPE_GAP: CGFloat!
+	private var VELOCITY: CGFloat!
+	private var BG_VELOCITY: CGFloat!
 	
-	private var tutorialLayer: SKNode?
-	private var hand: SKSpriteNode?
-	// private var pathEmitter: SKEmitterNode?
+	// Nodes
+	private lazy var navigation = childNode(withName: "Navigation")!
+	// lazy var timerNode = childNode(withName: "Time") as! SKLabelNode
 	
-	private var gameStartSound: SKAudioNode!
-	private var swipeSound: SKAudioNode!
-	private var backSound: SKAudioNode!
-	private var winSound: SKAudioNode!
-	private var hintSound: SKAudioNode!
-	private var notiFeedbackGenerator: UINotificationFeedbackGenerator?
-	private var impactFeedbackGenerator: UIImpactFeedbackGenerator?
+	private lazy var scoreLabel = childNode(withName: "Score") as! SKLabelNode2
+	private lazy var tutorial = childNode(withName: "Tutorial")!
 	
-	private var endGameAction: ((Int?)->Void)?
+	private lazy var mainCharacter = childNode(withName: "MainCharacter") as! SKSpriteNode
+	
+	private lazy var movingObjects = childNode(withName: "MovingObjects")!
+	private lazy var movingObstacles = movingObjects.childNode(withName: "MovingObstacles")!
+	
+	// Node templates
+	private let groundObstacleTemp1 = SKSpriteNode(imageNamed: "pipe_up_1")
+	private let groundObstacleTemp2 = SKSpriteNode(imageNamed: "pipe_up_2")
+	private let skyObstacleTemp1 = SKSpriteNode(imageNamed: "pipe_down_1")
+	private let skyObstacleTemp2 = SKSpriteNode(imageNamed: "pipe_down_2")
+	
+	// Physics
+	private let birdCategory: UInt32 = 1 << 0
+	private let groundCategory: UInt32 = 1 << 1
+	private let pipeCategory: UInt32 = 1 << 2
+	private let scoreCategory: UInt32 = 1 << 3
+	
+	// Actions
+	private var movePipesAndRemove: SKAction!
+	
+	// FX - sounds
+	private let flapSound = SKAudioNode(fileNamed: "sfx_wing")
+	private let hitSound = SKAudioNode(fileNamed: "sfx_hit")
+	private let fallingSound = SKAudioNode(fileNamed: "sfx_swooshing")
+	private let dieSound = SKAudioNode(fileNamed: "sfx_die")
+	private let scoringSound = SKAudioNode(fileNamed: "sfx_point")
+	// FX - vibration
+	private let notiFeedbackGenerator = UINotificationFeedbackGenerator()
+	private var impactFeedbackGenerator: UIImpactFeedbackGenerator!
+	
+	private var endGameAction: ((Int)->Void)?
 	
 	
 	override func sceneDidLoad() {
-		NSLog("--  \(TAG) | sceneDidLoad: \(hash) | \(frame)")
 		super.sceneDidLoad()
 		
-		self.lastUpdateTime = 0
-		
-		gameStartSound = SKAudioNode(url: Bundle.main.url(forResource: "game-start", withExtension: "wav")!)
-		swipeSound = SKAudioNode(url: Bundle.main.url(forResource: "swipe", withExtension: "wav")!)
-		backSound = SKAudioNode(url: Bundle.main.url(forResource: "swipe", withExtension: "wav")!)
-		winSound = SKAudioNode(url: Bundle.main.url(forResource: "winning", withExtension: "wav")!)
-		hintSound = SKAudioNode(url: Bundle.main.url(forResource: "hint", withExtension: "wav")!)
-		
-		sounds += [gameStartSound, swipeSound, backSound, winSound, hintSound]
-		
-		let vol = Helper.soundVolume
-		sounds.forEach {
-			$0.autoplayLooped = false
-			$0.run(SKAction.changeVolume(to: vol, duration: 0))
-			addChild($0)
-		}
-		
-		if #available(iOS 10.0, *) {
-			notiFeedbackGenerator = UINotificationFeedbackGenerator()
-			let style: UIImpactFeedbackGenerator.FeedbackStyle
-			if #available(iOS 13.0, *) { style = .soft } else { style = .light }
-			impactFeedbackGenerator = UIImpactFeedbackGenerator(style: style)
-		}
+		initFX("sceneDidLoad")
+		initObjects("sceneDidLoad")
 		
 		loadGame("sceneDidLoad")
 	}
 	
-	private var swipeU: UISwipeGestureRecognizer!,
-					swipeD: UISwipeGestureRecognizer!,
-					swipeR: UISwipeGestureRecognizer!,
-					swipeL: UISwipeGestureRecognizer!
-	
 	override func didMove(to view: SKView) {
-		// NSLog("--  \(TAG) | didMove to view | \(size)")
 		super.didMove(to: view)
 		
 		resizeScene("didMove")
-		sceneStartEffect("didMove")
-		
-		swipeU = UISwipeGestureRecognizer(target: self, action: #selector(self.swipeHandler(_:)))
-		swipeU.cancelsTouchesInView = false
-		swipeU.direction = .up
-		view.addGestureRecognizer(swipeU)
-		
-		swipeD = UISwipeGestureRecognizer(target: self, action: #selector(self.swipeHandler(_:)))
-		swipeD.cancelsTouchesInView = false
-		swipeD.direction = .down
-		view.addGestureRecognizer(swipeD)
-		
-		swipeR = UISwipeGestureRecognizer(target: self, action: #selector(self.swipeHandler(_:)))
-		swipeR.cancelsTouchesInView = false
-		swipeR.direction = .right
-		view.addGestureRecognizer(swipeR)
-		
-		swipeL = UISwipeGestureRecognizer(target: self, action: #selector(self.swipeHandler(_:)))
-		swipeL.cancelsTouchesInView = false
-		swipeL.direction = .left
-		view.addGestureRecognizer(swipeL)
+		// sceneStartEffect("didMove")
 		
 		// Move to the active state, starting the level timer.
 		stateMachine.enter(LevelSceneActiveState.self)
@@ -122,21 +123,10 @@ class GameScene: BaseScene {
 		sceneLoaded = true
 	}
 	
-	override func willMove(from view: SKView) {
-		// NSLog("--  \(TAG) | willMove from view")
-		super.willMove(from: view)
-		
-		view.removeGestureRecognizer(swipeU)
-		view.removeGestureRecognizer(swipeD)
-		view.removeGestureRecognizer(swipeR)
-		view.removeGestureRecognizer(swipeL)
-	}
-	
 	override func didChangeSize(_ oldSize: CGSize) {
-		// NSLog("--  \(TAG) | didChangeSize: \(view?.frame as Any? ?? "--") | \(frame)")
 		super.didChangeSize(oldSize)
 		
-		// scaleMode = .aspectFit
+		scaleMode = .aspectFit
 		if sceneLoaded { resizeScene("didChangeSize") }
 	}
 	
@@ -155,6 +145,12 @@ class GameScene: BaseScene {
 		for entity in self.entities {
 			entity.update(deltaTime: dt)
 		}
+		if gameState == .STARTED || gameState == .ENDED {
+			// update bird rotation
+			let verticalVelocity = mainCharacter.physicsBody!.velocity.dy
+			let rotation = (verticalVelocity + 700) * ((verticalVelocity + 700) > 0 ? 0.01 : 0.008)
+			mainCharacter.zRotation = min( max(-1.5, rotation), 0.35 )
+		}
 		
 		// Update the level's state machine.
 		if gameState == .STARTED {
@@ -164,6 +160,67 @@ class GameScene: BaseScene {
 		self.lastUpdateTime = currentTime
 	}
 	
+	private func initFX(_ tag: String) {
+		if !sounds.isEmpty { fatalError("!-  already init FX") }
+		
+		sounds += [flapSound, hitSound, fallingSound, dieSound, scoringSound]
+		
+		let vol = Helper.soundVolume
+		sounds.forEach {
+			$0.autoplayLooped = false
+			$0.run(SKAction.changeVolume(to: vol, duration: 0))
+			addChild($0)
+		}
+		
+		let style: UIImpactFeedbackGenerator.FeedbackStyle
+		if #available(iOS 13.0, *) { style = .soft } else { style = .light }
+		impactFeedbackGenerator = UIImpactFeedbackGenerator(style: style)
+	}
+	
+	private func initObjects(_ tag: String) {
+		// print("--  \(TAG) | initObjects [\(tag)]")
+		
+		// Physics
+		physicsWorld.gravity = CGVector(dx: 0, dy: -20)
+		physicsWorld.contactDelegate = self
+		
+		navigation.zPosition = GameLayer.navigation.rawValue
+		
+		scoreLabel.fontTextureAtlas = SKTextureAtlas(named: "number_score")
+		scoreLabel.fontMap = { atlas, c in
+			return atlas.textureNamed("number_score_0\(c)")
+		}
+		scoreLabel.zPosition = GameLayer.score.rawValue
+		
+		let tutorialTap = tutorial.childNode(withName: "tap-tap") as! SKSpriteNode
+		tutorialTap.texture!.filteringMode = .nearest
+		let tutorialReady = tutorial.childNode(withName: "get-ready") as! SKSpriteNode
+		tutorialReady.texture!.filteringMode = .nearest
+		tutorial.zPosition = GameLayer.tutorial.rawValue
+		
+		// Bird
+		mainCharacter.zPosition = GameLayer.mainCharacter.rawValue
+		let mainCharTextureAtlas = SKTextureAtlas(named: "bird\([0, 1, 2].randomElement()!)")
+		// mainCharacter.texture = mainCharTextureAtlas.textureNamed(mainCharTextureAtlas.textureNames.first!)
+		let anim = SKAction.animate(with: mainCharTextureAtlas.textureNames.map {
+			let t = mainCharTextureAtlas.textureNamed($0)
+			t.filteringMode = .nearest
+			return t
+		}, timePerFrame: 0.1)
+		let flap = SKAction.repeatForever(anim)
+		mainCharacter.run(flap, withKey: "flap")
+		
+		// Pipes
+		movingObjects.zPosition = GameLayer.objects.rawValue
+		
+		movingObstacles.speed = 0
+		
+		groundObstacleTemp1.texture!.filteringMode = .nearest
+		groundObstacleTemp2.texture!.filteringMode = .nearest
+		skyObstacleTemp1.texture!.filteringMode = .nearest
+		skyObstacleTemp2.texture!.filteringMode = .nearest
+	}
+	
 	private func loadGame(_ tag: String) {
 		gameNo = UserDefaults.standard.integer(forKey: CommonConfig.Keys.gamesCount) + 1
 		
@@ -171,31 +228,210 @@ class GameScene: BaseScene {
 		
 		UserDefaults.standard.set(gameNo, forKey: CommonConfig.Keys.gamesCount)
 		
-		setupScene("loadLevel|\(tag)")
-	}
-	
-	private func setupScene(_ tag: String) {
-		
+		score = 0
 	}
 	
 	private func resizeScene(_ tag: String) {
 		NSLog("--  \(TAG) | resizeScene [\(tag)]")
 		
-		updateScene("resizeScene|\(tag)")
+		PIPE_WIDTH = frame.width * 0.18
+		VELOCITY = frame.width * 0.53
+		BG_VELOCITY = frame.width * 0.025
+		
+		// Bird
+		let mainCharTextureSize = mainCharacter.texture!.size()
+		mainCharacter.setScale(min(frame.width * 0.12 / mainCharTextureSize.width, frame.height * 0.07 / mainCharTextureSize.height))
+		mainCharacter.position = CGPoint(x: self.frame.width * -0.2, y: self.frame.height * 0)
+		
+		mainCharacter.physicsBody = SKPhysicsBody(circleOfRadius: mainCharacter.size.height / 2.0)
+		mainCharacter.physicsBody!.isDynamic = false
+		mainCharacter.physicsBody!.allowsRotation = false
+		mainCharacter.physicsBody!.mass = 1
+		
+		mainCharacter.physicsBody!.categoryBitMask = birdCategory
+		mainCharacter.physicsBody!.collisionBitMask = groundCategory | pipeCategory
+		mainCharacter.physicsBody!.contactTestBitMask = groundCategory | pipeCategory
+		
+		let hop = SKAction.moveBy(x: 0, y: mainCharacter.size.height * 0.5, duration: 0.3)
+		mainCharacter.run(SKAction.repeatForever(SKAction.sequence([hop, hop.reversed()])), withKey: "hop")
+		
+		VERTICAL_PIPE_GAP = mainCharacter.size.height * 4.5
+		
+		// background
+		let background = movingObjects.childNode(withName: "background")!
+		background.zPosition = GameLayer.ObjectLayer.sky.rawValue
+		
+		let bgTexture = SKTexture(imageNamed: "bg_day")
+		bgTexture.filteringMode = .nearest
+		
+		let bgTextureSize = bgTexture.size()
+		let bgSize = CGSize(width: max(frame.width, frame.height * bgTextureSize.width / bgTextureSize.height),
+								  height: max(frame.height, frame.width * bgTextureSize.height / bgTextureSize.width))
+		
+		let moveBg = SKAction.moveBy(x: -bgSize.width, y: 0, duration: TimeInterval(bgSize.width / BG_VELOCITY))
+		let resetBg = SKAction.moveBy(x: bgSize.width, y: 0, duration: 0.0)
+		let moveBgsForever = SKAction.repeatForever(SKAction.sequence([moveBg, resetBg]))
+		
+		for i in 0 ..< 2 + Int(self.frame.width / ( bgTexture.size().width * 2 )) {
+			let node = SKSpriteNode(texture: bgTexture)
+			
+			node.size = bgSize
+			node.position = CGPoint(x: CGFloat(i) * node.size.width, y: 0)
+			
+			node.run(moveBgsForever)
+			
+			background.addChild(node)
+		}
+		
+		// ground
+		let groundTexture = SKTexture(imageNamed: "land")
+		groundTexture.filteringMode = .nearest
+		
+		let groundTextureSize = groundTexture.size()
+		let groundSize = CGSize(width: frame.width,
+										height: frame.width * groundTextureSize.height / groundTextureSize.width)
+		GROUND_HEIGHT_ON_DISPLAY = min(groundSize.height, frame.height * 0.14)
+		
+		let moveGround = SKAction.moveBy(x: -groundSize.width, y: 0, duration: TimeInterval(groundSize.width / VELOCITY))
+		let resetGround = SKAction.moveBy(x: groundSize.width, y: 0, duration: 0.0)
+		let moveGroundsForever = SKAction.repeatForever(SKAction.sequence([moveGround, resetGround]))
+		
+		for i in 0 ... 1 + Int(self.frame.height / groundSize.width) {
+			let ground = SKSpriteNode(texture: groundTexture)
+			ground.name = "ground"
+			ground.size = groundSize
+			ground.position = CGPoint( x: CGFloat(i) * ground.size.width, y: -frame.height/2 - ground.size.height/2 + GROUND_HEIGHT_ON_DISPLAY )
+			ground.zPosition = GameLayer.ObjectLayer.ground.rawValue
+			
+			ground.physicsBody = SKPhysicsBody(rectangleOf: ground.size)
+			ground.physicsBody!.isDynamic = false
+			ground.physicsBody!.categoryBitMask = groundCategory
+			//ground.physicsBody!.collisionBitMask = collisionCategory
+			//ground.physicsBody!.contactTestBitMask = collisionCategory
+			
+			ground.run(moveGroundsForever)
+			
+			movingObjects.addChild(ground)
+		}
+		
+		// Sky contact
+		let sky = SKNode()
+		sky.name = "sky"
+		sky.position = CGPoint(x: 0, y: frame.height * 0.5 + mainCharacter.frame.height)
+		sky.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: frame.width, height: 1))
+		sky.physicsBody!.isDynamic = false
+		sky.physicsBody!.categoryBitMask = pipeCategory
+		addChild(sky)
+		
+		// Pipes
+		let groundPipeTexture1Size = groundObstacleTemp1.texture!.size()
+		groundObstacleTemp1.name = "ground-pipe-1"
+		groundObstacleTemp1.size = CGSize(width: PIPE_WIDTH, height: PIPE_WIDTH * groundPipeTexture1Size.height / groundPipeTexture1Size.width)
+		let groundPipeTexture2Size = groundObstacleTemp2.texture!.size()
+		groundObstacleTemp2.name = "ground-pipe-2"
+		groundObstacleTemp2.size = CGSize(width: PIPE_WIDTH, height: PIPE_WIDTH * groundPipeTexture2Size.height / groundPipeTexture2Size.width)
+		let skyPipeTexture1Size = skyObstacleTemp1.texture!.size()
+		skyObstacleTemp1.name = "sky-pipe-1"
+		skyObstacleTemp1.size = CGSize(width: PIPE_WIDTH, height: PIPE_WIDTH * skyPipeTexture1Size.height / skyPipeTexture1Size.width)
+		let skyPipeTexture2Size = skyObstacleTemp2.texture!.size()
+		skyObstacleTemp2.name = "sky-pipe-2"
+		skyObstacleTemp2.size = CGSize(width: PIPE_WIDTH, height: PIPE_WIDTH * skyPipeTexture2Size.height / skyPipeTexture2Size.width)
+		
+		let spawnThenDelayForever = SKAction.repeatForever(SKAction.sequence([
+			SKAction.run { [weak self] in self!.spawnObstacles("") },
+			SKAction.wait(forDuration: (frame.width * 0.4 + PIPE_WIDTH) / VELOCITY)
+		]))
+		movingObstacles.run(SKAction.sequence([
+			SKAction.wait(forDuration: 2),
+			spawnThenDelayForever
+		]), withKey: "spawn")
+		
+		// create the pipes movement actions
+		let distanceToMove = frame.width + PIPE_WIDTH
+		let movePipes = SKAction.moveBy(x: -distanceToMove, y: 0, duration: TimeInterval(distanceToMove / VELOCITY))
+		let removePipes = SKAction.removeFromParent()
+		movePipesAndRemove = SKAction.sequence([movePipes, removePipes])
+		
+		scoreLabel.fontSize = min(frame.width * 0.1, frame.height * 0.04)
+		scoreLabel.textSpace = scoreLabel.fontSize * 0.1
+		scoreLabel.position = CGPoint(x: 0, y: frame.height * 0.35)
+		
+		let tutorialTap = tutorial.childNode(withName: "tap-tap") as! SKSpriteNode
+		tutorialTap.setScale(mainCharacter.xScale)
+		
+		let tutorialReady = tutorial.childNode(withName: "get-ready") as! SKSpriteNode
+		tutorialReady.setScale(mainCharacter.xScale)
+		tutorialReady.position.y = tutorialTap.frame.maxY + frame.height * 0.04 + tutorialReady.size.height / 2
+		
+		tutorial.position.y = frame.height * -0.02
+		
+		let navHeight = min(frame.height * 0.03, frame.width * 0.09)
+		navigation.position = CGPoint(x: 0, y: frame.height * 0.4)
+		let pauseBtn = navigation.childNode(withName: "Pause") as! ButtonNode
+		let pauseImg = pauseBtn.imgNode!
+		pauseImg.size = CGSize(width: navHeight * 1.6 * pauseImg.texture!.size().width / pauseImg.texture!.size().height, height: navHeight * 1.6)
+		pauseBtn.size = CGSize(width: navHeight * 1.7, height: navHeight * 1.7)
+		pauseBtn.position = CGPoint(x: -frame.width * 0.4, y: 0)
+		
+		// updateScene("resizeScene|\(tag)")
 	}
 	
-	public func updateScene(_ tag: String) {
-		// NSLog("--  \(TAG) | updateScene [\(tag)]")
+	private func spawnObstacles(_ tag: String) {
+		let pipePair = SKNode()
+		pipePair.position = CGPoint( x: (frame.width + PIPE_WIDTH) / 2, y: 0 )
+		pipePair.zPosition = GameLayer.ObjectLayer.obstacle.rawValue
 		
+		let height = UInt32(frame.height / 2)
+		let y: CGFloat = -frame.height / 4 + CGFloat(arc4random_uniform(height))
+		
+		let pipeDown = skyObstacleTemp1.copy() as! SKSpriteNode
+		pipeDown.position = CGPoint(x: 0, y: (GROUND_HEIGHT_ON_DISPLAY + VERTICAL_PIPE_GAP + pipeDown.size.height) / 2 + y)
+		
+		pipeDown.physicsBody = SKPhysicsBody(rectangleOf: pipeDown.size)
+		pipeDown.physicsBody!.isDynamic = false
+		pipeDown.physicsBody!.categoryBitMask = pipeCategory
+		pipeDown.physicsBody!.contactTestBitMask = birdCategory
+		pipePair.addChild(pipeDown)
+		
+		let pipeUp = groundObstacleTemp1.copy() as! SKSpriteNode
+		pipeUp.position = CGPoint(x: 0, y: (GROUND_HEIGHT_ON_DISPLAY - VERTICAL_PIPE_GAP - pipeUp.size.height) / 2 + y)
+		
+		pipeUp.physicsBody = SKPhysicsBody(rectangleOf: pipeUp.size)
+		pipeUp.physicsBody!.isDynamic = false
+		pipeUp.physicsBody!.categoryBitMask = pipeCategory
+		pipeUp.physicsBody!.contactTestBitMask = birdCategory
+		pipePair.addChild(pipeUp)
+		
+		let contactNode = SKNode()
+		contactNode.name = "score"
+		contactNode.position = CGPoint( x: pipeDown.size.width * 0.5, y: self.frame.midY )
+		contactNode.physicsBody = SKPhysicsBody(rectangleOf: CGSize( width: 1, height: self.frame.height ))
+		contactNode.physicsBody!.isDynamic = false
+		contactNode.physicsBody!.categoryBitMask = scoreCategory
+		contactNode.physicsBody!.contactTestBitMask = birdCategory
+		pipePair.addChild(contactNode)
+		
+		pipePair.run(movePipesAndRemove)
+		movingObstacles.addChild(pipePair)
 	}
 	
-	private func sceneStartEffect(_ tag: String, completion: (()->Void)? = nil) {
+	private func startGame(_ tag: String) {
+		movingObstacles.speed = 1
 		
-	}
-	
-	private func animateHand(_ tag: String) {
-		// print("--  \(TAG) | animateHand [\(tag)]: \(currentLevel.solDirection.count) - \(currentLevel.track.count)")
+		backgroundSoundPlayer?.stop()
+		// playSound(gameStartSound)
 		
+		tutorial.run(SKAction.sequence([
+			SKAction.fadeOut(withDuration: 0.2),
+			SKAction.removeFromParent()
+		]))
+		
+		mainCharacter.removeAction(forKey: "hop")
+		mainCharacter.physicsBody!.isDynamic = true
+		
+		gameState = .STARTED
+		
+		NSLog("--  \(TAG) | Game started")
 	}
 	
 	override func pause(_ tag: String) {
@@ -210,96 +446,115 @@ class GameScene: BaseScene {
 		stateMachine.enter(LevelSceneActiveState.self)
 	}
 	
-	func onEndGame(action: @escaping (Int?)->Void) {
+	func onEndGame(action: @escaping (Int)->Void) {
 		endGameAction = action
 	}
 	
-	@objc private func swipeHandler(_ gestureRecognizer : UISwipeGestureRecognizer) {
-		if !isUserInteractionEnabled
-				|| gameState != .STARTED || gestureRecognizer.state != .ended { return }
-		
-		// NSLog("--  \(TAG) | swiped: \(gestureRecognizer.direction.rawValue)")
-		
-		let d = gestureRecognizer.direction
-		let direction : Direction? = d == .up ? .UP : d == .down ? .DOWN : d == .left ? .LEFT : d == .right ? .RIGHT : nil
-		if direction != nil {
-			processInput("swipe", direction!)
-		}
-	}
-	
-	// detect keyboard pressed
-	override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
-		NSLog("--  \(TAG) | pressesBegan: \(presses.map { p in p.key?.charactersIgnoringModifiers })")
-		super.pressesBegan(presses, with: event)
+	override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+		processInput("touch")
 	}
 	
 	override func pressesDidBegin(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
-		// NSLog("--  \(TAG) | doPressesBegan: \(presses.map { p in p.key?.charactersIgnoringModifiers })")
+		// NSLog("--  \(TAG) | pressesDidBegin: \(presses.map { p in p.key?.charactersIgnoringModifiers })")
 		
-		if !isUserInteractionEnabled
-				|| gameState != .STARTED { return }
-		guard let key = presses.first?.key
-		else { return }
+		guard let _ = presses.first?.key else { return }
 		
-		let k = key.keyCode
-		let direction : Direction? = k == .keyboardUpArrow ? .UP : k == .keyboardDownArrow ? .DOWN : k == .keyboardLeftArrow ? .LEFT : k == .keyboardRightArrow ? .RIGHT : nil
-		if direction != nil {
-			processInput("press", direction!)
-		}
+		processInput("press")
 	}
 	
-	private func processInput(_ tag: String, _ direction: Direction) {
+	private func processInput(_ tag: String) {
+		if !isUserInteractionEnabled { return }
 		
+		if gameState == .PREPARED {
+			startGame("input|\(tag)")
+		} else if gameState == .PAUSED {
+			resume("input|\(tag)")
+		}
 		
-		if gameState == .ENDED {
-			endGame(tag)
+		if gameState == .STARTED {
+			mainCharacter.physicsBody!.velocity = CGVector(dx: 0, dy: 0)
+			mainCharacter.physicsBody!.applyImpulse(CGVector(dx: 0, dy: mainCharacter.physicsBody!.mass * 1000))
+			playSound(flapSound)
 		}
 	}
 	
 	private func endGame(_ tag: String) {
+		if gameState == .ENDED { return }
+		NSLog("--  \(TAG) | endGame [\(tag)]")
+		
+		gameState = .ENDED
 		setUserInteraction(false)
-		finishScene(tag)
+		
+		vibrate(impactFeedbackGenerator)
+		playSound(hitSound)
+		
+		movingObjects.speed = 0
+		
+		mainCharacter.physicsBody!.collisionBitMask = groundCategory // in case bird lands on top of pipe
+		mainCharacter.physicsBody!.velocity.dx = 0
+		
+		playSound(dieSound, delay: 0.3)
 	}
 	
 	private func finishScene(_ tag: String) {
+		if gameState == .FINISHED { fatalError("!-  game already finished") }
 		NSLog("--  \(TAG) | finishScene [\(tag)]")
 		
-		vibrate(impactFeedbackGenerator)
-		playSound(winSound)
+		gameState = .FINISHED
 		
-		let oldColor = backgroundColor
-		let newColor = UIColor.rgb(0xf6cd61)
-		// let background = self.childNode(withName: "background") as! SKSpriteNode
+		mainCharacter.speed = 0
+		physicsWorld.speed = 0
+		
+		dieSound.removeAllActions()
+		
+		let background = movingObjects.childNode(withName: "background")!
+		backgroundColor = SKColor(red: 0.1, green: 0, blue: 0.1, alpha: 1.0)
 		run(SKAction.sequence([
 			SKAction.repeat(SKAction.sequence([
-				SKAction.run { [weak self] in self?.backgroundColor = newColor },
+				SKAction.run { background.alpha = 0.7 },
 				SKAction.wait(forDuration: 0.1),
-				SKAction.run { [weak self] in self?.backgroundColor = oldColor },
+				SKAction.run { background.alpha = 1 },
 				SKAction.wait(forDuration: 0.1)
-			]), count: 2),
+			]), count: 3),
 			SKAction.wait(forDuration: 0.8),
 		])) { [weak self] in
-			if self == nil { return }
-			// self!.speed = 0
-			// self!.scoreLabel?.isHidden = true
+			self!.speed = 0
+			self!.scoreLabel.isHidden = true
 			
-			// let _ = ScoreData.insert(Score(self!.score))
-			// GameCenterHelper.submitScore(self!.score)
+			let _ = ScoreData.insert(self!.TAG, Score(self!.score))
+			GameCenterHelper.reportAchievement(self!.TAG, "game_\(self!.gameNo!)")
+			GameCenterHelper.reportAchievement(self!.TAG, "score_\(self!.gameNo!)")
+			GameCenterHelper.submitScore(self!.TAG, self!.score)
 			
-			self!.stateMachine.enter(LevelSceneSuccessState.self)
+			self!.stateMachine.enter(LevelSceneFinishState.self)
 			
 			NotificationCenter.default.post(name: .levelFinished, object: self!.gameNo)
 			
-			self!.endGameAction?(0)
+			self!.endGameAction?(self!.score)
 		}
 	}
+}
+
+extension GameScene: SKPhysicsContactDelegate {
 	
-	override func buttonTriggered(_ button: IButton) {
-		switch button.buttonIdentifier! {
-			case .pause:
-				pause(button.buttonIdentifier!.rawValue)
-			default:
-				super.buttonTriggered(button)
+	func didBegin(_ contact: SKPhysicsContact) {
+		print("--  \(TAG) | physics contact: \(contact.bodyA.node!.name!) >< \(contact.bodyB.node!.name!) | \(gameState)")
+		
+		if gameState != .ENDED && gameState != .FINISHED {
+			if (contact.bodyA.categoryBitMask & scoreCategory) == scoreCategory
+					|| (contact.bodyB.categoryBitMask & scoreCategory) == scoreCategory {
+				score += 1
+				playSound(scoringSound)
+			} else if (contact.bodyA.categoryBitMask & pipeCategory) == pipeCategory
+							|| (contact.bodyB.categoryBitMask & pipeCategory) == pipeCategory {
+				endGame("PhysicsContact|1")
+			}
+		}
+		if gameState != .FINISHED
+				&& ((contact.bodyA.categoryBitMask & groundCategory) == groundCategory
+					 || (contact.bodyB.categoryBitMask & groundCategory) == groundCategory) {
+			endGame("PhysicsContact|2")
+			finishScene("PhysicsContact")
 		}
 	}
 }

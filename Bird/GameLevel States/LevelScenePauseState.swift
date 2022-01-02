@@ -21,7 +21,13 @@ class LevelScenePauseState: LevelSceneOverlayState {
 	override func didEnter(from previousState: GKState?) {
 		super.didEnter(from: previousState)
 		
-		levelScene.gameState = .PAUSED
+		if levelScene.gameState == .STARTED {
+			levelScene.gameState = .PAUSED
+		}
+		
+		levelScene.speed = 0
+		levelScene.physicsWorld.speed = 0
+		
 		// levelScene.save("LevelScenePauseState|didEnter")
 	}
 	

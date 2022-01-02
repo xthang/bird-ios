@@ -18,7 +18,7 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lNL-Bd-k6b" customClass="XView" customModule="XLibrary">
                     <rect key="frame" x="20.5" y="134.5" width="373" height="627"/>
                     <subviews>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eca-dW-Bm6" customClass="SceneButton" customModule="Bird" customModuleProvider="target">
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eca-dW-Bm6" customClass="SceneButton">
                             <rect key="frame" x="325.5" y="16" width="31.5" height="31.5"/>
                             <accessibility key="accessibilityConfiguration" identifier="Close"/>
                             <constraints>

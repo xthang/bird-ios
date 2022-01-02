@@ -18,15 +18,25 @@ class BaseScene: BaseSKScene, ButtonResponder {
 			case .home:
 				overlays.forEach { $0.removeFromSuperview() }	// TODO
 				
-				let scene = SKScene(fileNamed: "HomeScene") as! HomeScene
-				view?.presentScene(scene, transition: SKTransition.doorsOpenVertical(withDuration: 0.5))
+				let scene = HomeScene(fileNamed: "HomeScene")!
+				view?.presentScene(scene, transition: .doorsOpenVertical(withDuration: 0.5))
+			case .play, .replay:
+				let scene = GameScene(fileNamed: "GameScene")!
+				let viewSizeAspect = view!.frame.height / view!.frame.width
+				if 1.3 < viewSizeAspect && viewSizeAspect < 2.2 {
+					scene.scaleMode = .resizeFill
+				} else {
+					scene.scaleMode = .aspectFit
+				}
+				
+				view!.presentScene(scene, transition: .doorsOpenHorizontal(withDuration: 0.5))
+			case .pause:
+				pause("buttonTriggered")
 			case .resume:
-				resume("IButton")
-			case .play:
-				view?.presentScene(GameScene(fileNamed: "GameScene")!, transition: SKTransition.doorsOpenHorizontal(withDuration: 0.5))
+				resume("buttonTriggered")
 			case .share:
 				if let img = view?.texture(from: self)?.cgImage() {
-					let text = String(format: NSLocalizedString("I am playing %@! Let's play with me!", comment: ""), Bundle.main.infoDictionary!["CFBundleDisplayName"] as! CVarArg)
+					let text = String(format: NSLocalizedString("I am playing %@! Let's play with me!", comment: ""), (Bundle.main.infoDictionary!["CFBundleDisplayName"] ?? Bundle.main.infoDictionary!["CFBundleName"]) as! CVarArg)
 					
 					let rect: CGRect?
 					if let b = button as? SKNode {
@@ -38,7 +48,7 @@ class BaseScene: BaseSKScene, ButtonResponder {
 					
 					Helper.share(TAG, button as? UIView ?? view!, rect, viewController: nil, text: text, image: UIImage(cgImage: img))
 				}
-			case .DEV, .about, .pause, .replay, .back, .hint, .settings, .sound, .gameCenter, .leaderboards, .achievements, .rate, .ads:
+			case .DEV, .about, .back, .hint, .settings, .sound, .gameCenter, .leaderboards, .achievements, .rate, .ads:
 				fatalError("Unsupported ButtonNode type `\(button.buttonIdentifier!)` in Scene.")
 		}
 	}
