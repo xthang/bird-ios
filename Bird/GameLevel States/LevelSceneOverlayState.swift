@@ -9,6 +9,8 @@
 import SpriteKit
 import GameplayKit
 
+import XLibrary
+
 class LevelSceneOverlayState: GKState {
 	// MARK: Properties
 	
@@ -27,7 +29,7 @@ class LevelSceneOverlayState: GKState {
 		
 		super.init()
 		
-		overlay = (SceneOverlay.initiate(fileName: overlaySceneFileName) as! SceneOverlay)
+		overlay = SceneOverlay.initiate(fileName: overlaySceneFileName)
 	}
 	
 	// MARK: GKState Life Cycle
@@ -47,6 +49,6 @@ class LevelSceneOverlayState: GKState {
 		//overlay.run(SKAction.fadeOut(withDuration: 0.25)) { [weak self] in
 		//	self?.overlay.removeFromParent()
 		//}
-		overlay.removeFromSuperview()
+		overlay.removeFromParent()
 	}
 }

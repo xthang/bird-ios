@@ -27,15 +27,20 @@ class HomeScene: BaseScene {
 		if true {
 			proceedButton?.labelNode?.text = "{PLAY}"
 		}
-		
-		// SceneManager.prepareScene(.level)
 	}
 	
 	override func didMove(to view: SKView) {
 		// NSLog("--  \(TAG) | didMove to view | \(size)")
 		super.didMove(to: view)
 		
-		let homeScene = SceneOverlay.initiate(.home)
-		view.addSubview(homeScene)
+		let btnHeight = min(frame.height * 0.01, frame.width * 0.2)
+		
+		if let btnStart = proceedButton {
+			let startBtnImage = btnStart.imgNode!
+			btnStart.setScale(btnHeight / startBtnImage.texture!.size().height)
+			btnStart.position = CGPoint(x: 0, y: 0)
+		}
+		
+		SceneManager.prepareScene(.game)
 	}
 }

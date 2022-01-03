@@ -13,7 +13,7 @@ class LevelScenePauseState: LevelSceneOverlayState {
 	// MARK: Properties
 	
 	override var overlaySceneFileName: String {
-		return "PauseScene"
+		return "GamePauseScene"
 	}
 	
 	// MARK: GKState Life Cycle
@@ -25,7 +25,7 @@ class LevelScenePauseState: LevelSceneOverlayState {
 			levelScene.gameState = .PAUSED
 		}
 		
-		levelScene.speed = 0
+		levelScene.root.speed = 0
 		levelScene.physicsWorld.speed = 0
 		
 		// levelScene.save("LevelScenePauseState|didEnter")

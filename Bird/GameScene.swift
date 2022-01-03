@@ -48,9 +48,8 @@ class GameScene: BaseScene {
 		LevelSceneFinishState(levelScene: self)
 	])
 	
-	private var score : Int = 0 {
+	var score : Int = -1 {
 		didSet {
-			print("--  didSet score: \(score)")
 			scoreLabel.text = "\(score)"
 		}
 	}
@@ -63,15 +62,16 @@ class GameScene: BaseScene {
 	private var BG_VELOCITY: CGFloat!
 	
 	// Nodes
-	private lazy var navigation = childNode(withName: "Navigation")!
-	// lazy var timerNode = childNode(withName: "Time") as! SKLabelNode
+	lazy var root = childNode(withName: "game")!
+	private lazy var navigation = root.childNode(withName: "Navigation")!
+	// lazy var timerNode = root.childNode(withName: "Time") as! SKLabelNode
 	
-	private lazy var scoreLabel = childNode(withName: "Score") as! SKLabelNode2
-	private lazy var tutorial = childNode(withName: "Tutorial")!
+	private lazy var scoreLabel = root.childNode(withName: "Score") as! SKLabelNode2
+	private lazy var tutorial = root.childNode(withName: "Tutorial")!
 	
-	private lazy var mainCharacter = childNode(withName: "MainCharacter") as! SKSpriteNode
+	private lazy var mainCharacter = root.childNode(withName: "MainCharacter") as! SKSpriteNode
 	
-	private lazy var movingObjects = childNode(withName: "MovingObjects")!
+	private lazy var movingObjects = root.childNode(withName: "MovingObjects")!
 	private lazy var movingObstacles = movingObjects.childNode(withName: "MovingObstacles")!
 	
 	// Node templates
@@ -148,7 +148,7 @@ class GameScene: BaseScene {
 		if gameState == .STARTED || gameState == .ENDED {
 			// update bird rotation
 			let verticalVelocity = mainCharacter.physicsBody!.velocity.dy
-			let rotation = (verticalVelocity + 700) * ((verticalVelocity + 700) > 0 ? 0.01 : 0.008)
+			let rotation = (verticalVelocity + 400) * ((verticalVelocity + 400) > 0 ? 0.01 : 0.0015)
 			mainCharacter.zRotation = min( max(-1.5, rotation), 0.35 )
 		}
 		
@@ -181,7 +181,6 @@ class GameScene: BaseScene {
 		// print("--  \(TAG) | initObjects [\(tag)]")
 		
 		// Physics
-		physicsWorld.gravity = CGVector(dx: 0, dy: -20)
 		physicsWorld.contactDelegate = self
 		
 		navigation.zPosition = GameLayer.navigation.rawValue
@@ -232,7 +231,9 @@ class GameScene: BaseScene {
 	}
 	
 	private func resizeScene(_ tag: String) {
-		NSLog("--  \(TAG) | resizeScene [\(tag)]")
+		NSLog("--  \(TAG) | resizeScene [\(tag)]: \(frame)")
+		
+		physicsWorld.gravity = CGVector(dx: 0, dy: -frame.height * 0.015)
 		
 		PIPE_WIDTH = frame.width * 0.18
 		VELOCITY = frame.width * 0.53
@@ -240,7 +241,7 @@ class GameScene: BaseScene {
 		
 		// Bird
 		let mainCharTextureSize = mainCharacter.texture!.size()
-		mainCharacter.setScale(min(frame.width * 0.12 / mainCharTextureSize.width, frame.height * 0.07 / mainCharTextureSize.height))
+		mainCharacter.setScale(min(frame.width * 0.12 / mainCharTextureSize.width, frame.height * 0.06 / mainCharTextureSize.height))
 		mainCharacter.position = CGPoint(x: self.frame.width * -0.2, y: self.frame.height * 0)
 		
 		mainCharacter.physicsBody = SKPhysicsBody(circleOfRadius: mainCharacter.size.height / 2.0)
@@ -255,7 +256,7 @@ class GameScene: BaseScene {
 		let hop = SKAction.moveBy(x: 0, y: mainCharacter.size.height * 0.5, duration: 0.3)
 		mainCharacter.run(SKAction.repeatForever(SKAction.sequence([hop, hop.reversed()])), withKey: "hop")
 		
-		VERTICAL_PIPE_GAP = mainCharacter.size.height * 4.5
+		VERTICAL_PIPE_GAP = mainCharacter.size.height * 4.295
 		
 		// background
 		let background = movingObjects.childNode(withName: "background")!
@@ -366,7 +367,7 @@ class GameScene: BaseScene {
 		tutorial.position.y = frame.height * -0.02
 		
 		let navHeight = min(frame.height * 0.03, frame.width * 0.09)
-		navigation.position = CGPoint(x: 0, y: frame.height * 0.4)
+		navigation.position = CGPoint(x: 0, y: frame.height * 0.45)
 		let pauseBtn = navigation.childNode(withName: "Pause") as! ButtonNode
 		let pauseImg = pauseBtn.imgNode!
 		pauseImg.size = CGSize(width: navHeight * 1.6 * pauseImg.texture!.size().width / pauseImg.texture!.size().height, height: navHeight * 1.6)
@@ -463,7 +464,10 @@ class GameScene: BaseScene {
 	}
 	
 	private func processInput(_ tag: String) {
-		if !isUserInteractionEnabled { return }
+		if !isUserInteractionEnabled {
+			NSLog("!-  \(TAG) | processInput: \(isUserInteractionEnabled)")
+			return
+		}
 		
 		if gameState == .PREPARED {
 			startGame("input|\(tag)")
@@ -473,7 +477,7 @@ class GameScene: BaseScene {
 		
 		if gameState == .STARTED {
 			mainCharacter.physicsBody!.velocity = CGVector(dx: 0, dy: 0)
-			mainCharacter.physicsBody!.applyImpulse(CGVector(dx: 0, dy: mainCharacter.physicsBody!.mass * 1000))
+			mainCharacter.physicsBody!.applyImpulse(CGVector(dx: 0, dy: mainCharacter.physicsBody!.mass * frame.height * 0.7))
 			playSound(flapSound)
 		}
 	}
@@ -518,7 +522,7 @@ class GameScene: BaseScene {
 			]), count: 3),
 			SKAction.wait(forDuration: 0.8),
 		])) { [weak self] in
-			self!.speed = 0
+			self!.root.speed = 0
 			self!.scoreLabel.isHidden = true
 			
 			let _ = ScoreData.insert(self!.TAG, Score(self!.score))

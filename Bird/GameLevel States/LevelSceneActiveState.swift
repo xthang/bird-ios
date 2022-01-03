@@ -59,7 +59,7 @@ class LevelSceneActiveState: GKState {
 		
 		levelScene.setUserInteraction(true)
 		
-		levelScene.speed = 1
+		levelScene.root.speed = 1
 		levelScene.physicsWorld.speed = 1
 	}
 	

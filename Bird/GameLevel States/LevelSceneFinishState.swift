@@ -13,7 +13,7 @@ class LevelSceneFinishState: LevelSceneOverlayState {
 	// MARK: Properties
 	
 	override var overlaySceneFileName: String {
-		return "FinishScene"
+		return "GameFinishScene"
 	}
 	
 	// MARK: GKState Life Cycle
