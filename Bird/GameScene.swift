@@ -55,6 +55,7 @@ class GameScene: BaseScene {
 	}
 	
 	// Calculation
+	private var MAIN_CHARACTER_HEIGHT: CGFloat!
 	private var GROUND_HEIGHT_ON_DISPLAY: CGFloat!
 	private var PIPE_WIDTH: CGFloat!
 	private var VERTICAL_PIPE_GAP: CGFloat!
@@ -148,7 +149,7 @@ class GameScene: BaseScene {
 		if gameState == .STARTED || gameState == .ENDED {
 			// update bird rotation
 			let verticalVelocity = mainCharacter.physicsBody!.velocity.dy
-			let rotation = (verticalVelocity + 400) * ((verticalVelocity + 400) > 0 ? 0.01 : 0.0015)
+			let rotation = (verticalVelocity + MAIN_CHARACTER_HEIGHT * 12) * ((verticalVelocity + MAIN_CHARACTER_HEIGHT * 12) > 0 ? 0.01 : 0.0025)
 			mainCharacter.zRotation = min( max(-1.5, rotation), 0.35 )
 		}
 		
@@ -200,12 +201,12 @@ class GameScene: BaseScene {
 		// Bird
 		mainCharacter.zPosition = GameLayer.mainCharacter.rawValue
 		let mainCharTextureAtlas = SKTextureAtlas(named: "bird\([0, 1, 2].randomElement()!)")
-		// mainCharacter.texture = mainCharTextureAtlas.textureNamed(mainCharTextureAtlas.textureNames.first!)
+		mainCharacter.texture = mainCharTextureAtlas.textureNamed(mainCharTextureAtlas.textureNames.first!)
 		let anim = SKAction.animate(with: mainCharTextureAtlas.textureNames.map {
 			let t = mainCharTextureAtlas.textureNamed($0)
 			t.filteringMode = .nearest
 			return t
-		}, timePerFrame: 0.1)
+		}, timePerFrame: 0.08)
 		let flap = SKAction.repeatForever(anim)
 		mainCharacter.run(flap, withKey: "flap")
 		
@@ -233,12 +234,6 @@ class GameScene: BaseScene {
 	private func resizeScene(_ tag: String) {
 		NSLog("--  \(TAG) | resizeScene [\(tag)]: \(frame)")
 		
-		physicsWorld.gravity = CGVector(dx: 0, dy: -frame.height * 0.015)
-		
-		PIPE_WIDTH = frame.width * 0.18
-		VELOCITY = frame.width * 0.53
-		BG_VELOCITY = frame.width * 0.025
-		
 		// Bird
 		let mainCharTextureSize = mainCharacter.texture!.size()
 		mainCharacter.setScale(min(frame.width * 0.12 / mainCharTextureSize.width, frame.height * 0.06 / mainCharTextureSize.height))
@@ -256,7 +251,15 @@ class GameScene: BaseScene {
 		let hop = SKAction.moveBy(x: 0, y: mainCharacter.size.height * 0.5, duration: 0.3)
 		mainCharacter.run(SKAction.repeatForever(SKAction.sequence([hop, hop.reversed()])), withKey: "hop")
 		
-		VERTICAL_PIPE_GAP = mainCharacter.size.height * 4.295
+		MAIN_CHARACTER_HEIGHT = mainCharacter.size.height
+		let MAIN_CHARACTER_WIDTH = mainCharacter.size.width
+		
+		physicsWorld.gravity = CGVector(dx: 0, dy: -MAIN_CHARACTER_HEIGHT * 0.35)
+		
+		PIPE_WIDTH = MAIN_CHARACTER_WIDTH * 52 / 34
+		VERTICAL_PIPE_GAP = MAIN_CHARACTER_HEIGHT * 4.295
+		VELOCITY = MAIN_CHARACTER_WIDTH * 4
+		BG_VELOCITY = MAIN_CHARACTER_WIDTH * 0.2
 		
 		// background
 		let background = movingObjects.childNode(withName: "background")!
@@ -291,7 +294,7 @@ class GameScene: BaseScene {
 		let groundTextureSize = groundTexture.size()
 		let groundSize = CGSize(width: frame.width,
 										height: frame.width * groundTextureSize.height / groundTextureSize.width)
-		GROUND_HEIGHT_ON_DISPLAY = min(groundSize.height, frame.height * 0.14)
+		GROUND_HEIGHT_ON_DISPLAY = min(groundSize.height, frame.height * 0.2)
 		
 		let moveGround = SKAction.moveBy(x: -groundSize.width, y: 0, duration: TimeInterval(groundSize.width / VELOCITY))
 		let resetGround = SKAction.moveBy(x: groundSize.width, y: 0, duration: 0.0)
@@ -318,7 +321,7 @@ class GameScene: BaseScene {
 		// Sky contact
 		let sky = SKNode()
 		sky.name = "sky"
-		sky.position = CGPoint(x: 0, y: frame.height * 0.5 + mainCharacter.frame.height)
+		sky.position = CGPoint(x: 0, y: frame.height * 0.5 + MAIN_CHARACTER_HEIGHT)
 		sky.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: frame.width, height: 1))
 		sky.physicsBody!.isDynamic = false
 		sky.physicsBody!.categoryBitMask = pipeCategory
@@ -340,7 +343,7 @@ class GameScene: BaseScene {
 		
 		let spawnThenDelayForever = SKAction.repeatForever(SKAction.sequence([
 			SKAction.run { [weak self] in self!.spawnObstacles("") },
-			SKAction.wait(forDuration: (frame.width * 0.4 + PIPE_WIDTH) / VELOCITY)
+			SKAction.wait(forDuration: PIPE_WIDTH * 3 / VELOCITY)
 		]))
 		movingObstacles.run(SKAction.sequence([
 			SKAction.wait(forDuration: 2),
@@ -382,8 +385,8 @@ class GameScene: BaseScene {
 		pipePair.position = CGPoint( x: (frame.width + PIPE_WIDTH) / 2, y: 0 )
 		pipePair.zPosition = GameLayer.ObjectLayer.obstacle.rawValue
 		
-		let height = UInt32(frame.height / 2)
-		let y: CGFloat = -frame.height / 4 + CGFloat(arc4random_uniform(height))
+		let height = UInt32(MAIN_CHARACTER_HEIGHT * 8)
+		let y: CGFloat = -MAIN_CHARACTER_HEIGHT * 4 + CGFloat(arc4random_uniform(height))
 		
 		let pipeDown = skyObstacleTemp1.copy() as! SKSpriteNode
 		pipeDown.position = CGPoint(x: 0, y: (GROUND_HEIGHT_ON_DISPLAY + VERTICAL_PIPE_GAP + pipeDown.size.height) / 2 + y)
@@ -477,7 +480,8 @@ class GameScene: BaseScene {
 		
 		if gameState == .STARTED {
 			mainCharacter.physicsBody!.velocity = CGVector(dx: 0, dy: 0)
-			mainCharacter.physicsBody!.applyImpulse(CGVector(dx: 0, dy: mainCharacter.physicsBody!.mass * frame.height * 0.7))
+			mainCharacter.physicsBody!.applyImpulse(CGVector(dx: 0, dy: mainCharacter.physicsBody!.mass * MAIN_CHARACTER_HEIGHT * 17))
+			flapSound.removeAllActions()
 			playSound(flapSound)
 		}
 	}

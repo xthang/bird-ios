@@ -32,12 +32,6 @@ class LevelScenePauseState: LevelSceneOverlayState {
 	}
 	
 	override func isValidNextState(_ stateClass: AnyClass) -> Bool {
-		return stateClass is LevelSceneActiveState.Type
-	}
-	
-	override func willExit(to nextState: GKState) {
-		super.willExit(to: nextState)
-		
-		// levelScene.worldNode.isPaused = false
+		return !(stateClass is LevelScenePauseState.Type)
 	}
 }

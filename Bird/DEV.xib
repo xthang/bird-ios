@@ -18,7 +18,7 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lNL-Bd-k6b" customClass="XView" customModule="XLibrary">
                     <rect key="frame" x="20.5" y="134.5" width="373" height="627"/>
                     <subviews>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eca-dW-Bm6" customClass="SceneButton">
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eca-dW-Bm6" customClass="SceneButton" customModule="Bird" customModuleProvider="target">
                             <rect key="frame" x="325.5" y="16" width="31.5" height="31.5"/>
                             <accessibility key="accessibilityConfiguration" identifier="Close"/>
                             <constraints>
@@ -101,9 +101,6 @@
                                                             <state key="normal" title="SET">
                                                                 <color key="titleColor" red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                             </state>
-                                                            <connections>
-                                                                <action selector="setLevel:" destination="iN0-l3-epB" eventType="touchUpInside" id="ZSc-wZ-Yzt"/>
-                                                            </connections>
                                                         </button>
                                                     </subviews>
                                                     <constraints>
@@ -197,9 +194,6 @@
                                                     <inset key="contentEdgeInsets" minX="10" minY="10" maxX="10" maxY="10"/>
                                                     <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                     <state key="normal" title="SAVE GRID"/>
-                                                    <connections>
-                                                        <action selector="saveGrid:" destination="iN0-l3-epB" eventType="touchUpInside" id="O1a-ck-6PB"/>
-                                                    </connections>
                                                 </button>
                                             </subviews>
                                             <constraints>

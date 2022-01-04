@@ -26,9 +26,11 @@ class GameFinishScene: SceneOverlay {
 	private lazy var bestScoreLabel = scorePanel.childNode(withName: "BestScore") as! SKLabelNode2
 	private lazy var newLabel = scorePanel.childNode(withName: "New") as! SKSpriteNode
 	private lazy var medal = scorePanel.childNode(withName: "Medal") as! SKSpriteNode
+	private var twinkles = SKNode()
 	
 	private lazy var buttons = childNode(withName: "Buttons")!
 	private lazy var btnNewGame = buttons.childNode(withName: "Play") as! ButtonNode
+	private lazy var btnLeaderboards = buttons.childNode(withName: "Leaderboards") as! ButtonNode
 	private lazy var btnHome = buttons.childNode(withName: "Home") as! ButtonNode
 	private lazy var btnShare = buttons.childNode(withName: "Share") as! ButtonNode
 	
@@ -36,9 +38,10 @@ class GameFinishScene: SceneOverlay {
 	override func sceneDidLoad(_ tag: String) {
 		super.sceneDidLoad(tag)
 		
-		[btnNewGame, btnHome, btnShare].forEach {
-			$0.imgNode!.texture!.filteringMode = .nearest
-			$0.isUserInteractionEnabled = false
+		buttons.children.forEach {
+			let b = $0 as! ButtonNode
+			b.imgNode!.texture!.filteringMode = .nearest
+			b.isUserInteractionEnabled = false
 		}
 		
 		gameOverText.texture!.filteringMode = .nearest
@@ -59,22 +62,54 @@ class GameFinishScene: SceneOverlay {
 		bestScoreLabel.horizontalAlignmentMode = .right
 		
 		newLabel.texture!.filteringMode = .nearest
+		newLabel.zPosition = 1
 		
 		medal.zPosition = 1
+		
+		let twinkleTextureAtlas = SKTextureAtlas(named: "blink")
+		let twinkle = SKSpriteNode(texture: twinkleTextureAtlas.textureNamed(twinkleTextureAtlas.textureNames.first!))
+		let blinking = SKAction.animate(with: twinkleTextureAtlas.textureNames.map {
+			let t = twinkleTextureAtlas.textureNamed($0)
+			t.filteringMode = .nearest
+			return t
+		}, timePerFrame: 0.16)
+		let blinkingForever = SKAction.repeatForever(blinking)
+		
+		for _ in 0 ... 7 {
+			let t = twinkle.copy() as! SKSpriteNode
+			t.run(SKAction.sequence([
+				SKAction.wait(forDuration: TimeInterval(arc4random_uniform(20)) / 40),
+				blinkingForever
+			]), withKey: "blinking")
+			twinkles.addChild(t)
+		}
+		
+		twinkles.zPosition = 1
+		medal.addChild(twinkles)
 	}
 	
 	func update(_ tag: String, levelScene: GameScene) {
 		self.gameNo = levelScene.gameNo
 		self.score = levelScene.score
 		
-		medal.texture = SKTexture(imageNamed: "medal_gold")
-		medal.texture!.filteringMode = .nearest
+		if score >= 10 {
+			medal.texture = SKTexture(imageNamed: "medal_gold")
+		} else if score >= 8 {
+			medal.texture = SKTexture(imageNamed: "medal_silver")
+		} else if score >= 6 {
+			medal.texture = SKTexture(imageNamed: "medal_bronze")
+		} else if score >= 4 {
+			medal.texture = SKTexture(imageNamed: "medal_aluminum")
+		} else {
+			medal.texture = nil
+		}
+		medal.texture?.filteringMode = .nearest
 		
 		let best = UserDefaults.standard.integer(forKey: CommonConfig.Keys.bestScore)
 		let newBest = max(best, self.score)
 		UserDefaults.standard.set(newBest, forKey: CommonConfig.Keys.bestScore)
-		//	self!.newLabel.isHidden = best >= score
 		self.bestScoreLabel.text = "\(newBest)"
+		self.newLabel.isHidden = best >= score
 	}
 	
 	override func willMove(_ tag: String, to scene: SKScene) {
@@ -91,8 +126,10 @@ class GameFinishScene: SceneOverlay {
 		scorePanel.position.y = scene.frame.maxY + scorePanel.size.height / 2
 		
 		scoreLabel.fontSize = scorePanel.size.height * 0.13
+		scoreLabel.textSpace = scoreLabel.fontSize * 0.1
 		scoreLabel.position = CGPoint(x: scorePanel.size.width * 0.38, y: scorePanel.size.height * 0.14)
 		bestScoreLabel.fontSize = scorePanel.size.height * 0.13
+		bestScoreLabel.textSpace = bestScoreLabel.fontSize * 0.1
 		bestScoreLabel.position = CGPoint(x: scorePanel.size.width * 0.38, y: -scorePanel.size.height * 0.21)
 		
 		loadingScore = 0
@@ -101,22 +138,37 @@ class GameFinishScene: SceneOverlay {
 		let newLabelTextureSize = newLabel.texture!.size()
 		newLabel.size = CGSize(width: newLabelHeight * newLabelTextureSize.width / newLabelTextureSize.height, height: newLabelHeight)
 		newLabel.position = CGPoint(x: scorePanel.size.width * 0.125, y: -scorePanel.size.height * 0.036)
-		newLabel.isHidden = false
+		newLabel.isHidden = true
 		
-		let medalHeight = scorePanel.size.height * 0.348
-		let medalTextureSize = medal.texture!.size()
-		medal.size = CGSize(width: medalHeight * medalTextureSize.width / medalTextureSize.height, height: medalHeight)
-		medal.position = CGPoint(x: -scorePanel.size.width * 0.273, y: -scorePanel.size.height * 0.028)
+		if medal.texture != nil {
+			let medalHeight = scorePanel.size.height * 0.348
+			let medalTextureSize = medal.texture!.size()
+			medal.size = CGSize(width: medalHeight * medalTextureSize.width / medalTextureSize.height, height: medalHeight)
+			medal.position = CGPoint(x: -scorePanel.size.width * 0.273, y: -scorePanel.size.height * 0.028)
+		}
 		medal.isHidden = true
 		
-		[btnNewGame, btnHome, btnShare].forEach {
-			let btnTextureSize = $0.imgNode!.texture!.size()
-			let scale = min(scene.frame.height * 0.1 / btnTextureSize.height, scene.frame.width * 0.25 / btnTextureSize.width)
-			$0.imgNode!.size = CGSize(width: btnTextureSize.width * scale, height: btnTextureSize.height * scale)
-			$0.size = CGSize(width: $0.imgNode!.size.width + 3, height: $0.imgNode!.size.height + 3)
+		let medalRadius = medal.size.height * 0.5
+		let size = medal.size.width * 0.15
+		twinkles.children.forEach {
+			($0 as! SKSpriteNode).size = CGSize(width: size, height: size)
+			
+			let r = medalRadius * sqrt(CGFloat(arc4random()) / CGFloat(UInt32.max))
+			let theta = (CGFloat(arc4random()) / CGFloat(UInt32.max)) * 2 * Double.pi
+			$0.position = CGPoint(x: r * cos(theta), y: r * sin(theta))
 		}
-		btnNewGame.position.x = -scene.frame.width * 0.3
-		btnShare.position.x = scene.frame.width * 0.3
+		
+		buttons.children.forEach {
+			let b = $0 as! ButtonNode
+			let btnTextureSize = b.imgNode!.texture!.size()
+			let scale = min(scene.frame.height * 0.15 / btnTextureSize.height, scene.frame.width * 0.3 / btnTextureSize.width)
+			b.imgNode!.size = CGSize(width: btnTextureSize.width * scale, height: btnTextureSize.height * scale)
+			b.size = CGSize(width: b.imgNode!.size.width + 3, height: b.imgNode!.size.height + 3)
+		}
+		btnNewGame.position = CGPoint(x: -scene.frame.width * 0.22, y: 0)
+		btnLeaderboards.position = CGPoint(x: scene.frame.width * 0.22, y: 0)
+		btnHome.position = CGPoint(x: -scene.frame.width * 0.22, y: btnNewGame.frame.minY - btnHome.size.height)
+		btnShare.position = CGPoint(x: scene.frame.width * 0.22, y: btnHome.position.y)
 		
 		let buttonsHeight = btnNewGame.frame.height
 		buttons.position.y = scene.frame.minY - buttonsHeight / 2
@@ -125,18 +177,17 @@ class GameFinishScene: SceneOverlay {
 	override func didMove(_ tag: String, to scene: SKScene) {
 		super.didMove(tag, to: scene)
 		
-		gameOverText.run(SKAction.move(to: CGPoint(x: 0, y: scene.frame.height * 0.25), duration: 0.3)) { [weak self] in
-			self!.scorePanel.run(SKAction.move(to: CGPoint(x: 0, y: scene.frame.height * 0), duration: 0.4)) { [weak self] in
-				self!.buttons.run(SKAction.move(to: CGPoint(x: 0, y: -scene.frame.height * 0.25), duration: 0.3)) { [weak self] in
+		gameOverText.run(SKAction.move(to: CGPoint(x: 0, y: scene.frame.height * 0.25), duration: 0.15)) { [weak self] in
+			self!.scorePanel.run(SKAction.move(to: CGPoint(x: 0, y: scene.frame.height * 0), duration: 0.3)) { [weak self] in
+				self!.runScore()
+				self!.buttons.run(SKAction.move(to: CGPoint(x: 0, y: -scene.frame.height * 0.2), duration: 0.15)) { [weak self] in
 					self!.didShow("")
 				}
 			}
 		}
 	}
 	
-	private func didShow(_ tag: String) {
-		print("--  \(TAG) | didShow [\(tag)]")
-		
+	private func runScore() {
 		var sequence: [SKAction] = [SKAction.wait(forDuration: 0.5)]
 		for s in 0 ... score {
 			sequence += [
@@ -146,14 +197,18 @@ class GameFinishScene: SceneOverlay {
 		}
 		
 		run(SKAction.sequence(sequence)) { [weak self] in
-			
-			self!.medal.isHidden = false
-			
-			self!.btnNewGame.isUserInteractionEnabled = true
-			self!.btnHome.isUserInteractionEnabled = true
-			self!.btnShare.isUserInteractionEnabled = true
-			
-			_ = (self!.scene!.view!.viewController as! GameViewController).showAdInterstitial("\(self!.TAG)|didShow|\(tag)", gameNo: self!.gameNo)
+			if self!.medal.texture != nil {
+				self!.medal.isHidden = false
+				//self!.twinkles.isHidden = false
+			}
 		}
+	}
+	
+	private func didShow(_ tag: String) {
+		buttons.children.forEach {
+			$0.isUserInteractionEnabled = true
+		}
+		
+		_ = (self.scene!.view!.viewController as! GameViewController).showAdInterstitial("\(self.TAG)|didShow|\(tag)", gameNo: self.gameNo)
 	}
 }

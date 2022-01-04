@@ -14,6 +14,8 @@ import XLibrary
 class LevelSceneOverlayState: GKState {
 	// MARK: Properties
 	
+	private let TAG = "\(LevelSceneOverlayState.self)"
+	
 	unowned let levelScene: GameScene
 	
 	/// The `SceneOverlay` to display when the state is entered.
@@ -49,6 +51,6 @@ class LevelSceneOverlayState: GKState {
 		//overlay.run(SKAction.fadeOut(withDuration: 0.25)) { [weak self] in
 		//	self?.overlay.removeFromParent()
 		//}
-		overlay.removeFromParent()
+		overlay.removeFromParent("\(type(of: self))|willExit")
 	}
 }
