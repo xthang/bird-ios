@@ -93,7 +93,6 @@ class GameScene: BaseScene {
 	// FX - sounds
 	private let flapSound = SKAudioNode(fileNamed: "sfx_wing")
 	private let hitSound = SKAudioNode(fileNamed: "sfx_hit")
-	private let fallingSound = SKAudioNode(fileNamed: "sfx_swooshing")
 	private let dieSound = SKAudioNode(fileNamed: "sfx_die")
 	private let scoringSound = SKAudioNode(fileNamed: "sfx_point")
 	// FX - vibration
@@ -164,7 +163,7 @@ class GameScene: BaseScene {
 	private func initFX(_ tag: String) {
 		if !sounds.isEmpty { fatalError("!-  already init FX") }
 		
-		sounds += [flapSound, hitSound, fallingSound, dieSound, scoringSound]
+		sounds += [flapSound, hitSound, dieSound, scoringSound]
 		
 		let vol = Helper.soundVolume
 		sounds.forEach {
@@ -263,6 +262,7 @@ class GameScene: BaseScene {
 		
 		// background
 		let background = movingObjects.childNode(withName: "background")!
+		background.removeAllChildren()
 		background.zPosition = GameLayer.ObjectLayer.sky.rawValue
 		
 		let bgTexture = SKTexture(imageNamed: "bg_day")
@@ -288,6 +288,10 @@ class GameScene: BaseScene {
 		}
 		
 		// ground
+		let grounds = movingObjects.childNode(withName: "ground")!
+		grounds.zPosition = GameLayer.ObjectLayer.ground.rawValue
+		grounds.removeAllChildren()
+		
 		let groundTexture = SKTexture(imageNamed: "land")
 		groundTexture.filteringMode = .nearest
 		
@@ -305,7 +309,6 @@ class GameScene: BaseScene {
 			ground.name = "ground"
 			ground.size = groundSize
 			ground.position = CGPoint( x: CGFloat(i) * ground.size.width, y: -frame.height/2 - ground.size.height/2 + GROUND_HEIGHT_ON_DISPLAY )
-			ground.zPosition = GameLayer.ObjectLayer.ground.rawValue
 			
 			ground.physicsBody = SKPhysicsBody(rectangleOf: ground.size)
 			ground.physicsBody!.isDynamic = false
@@ -315,7 +318,7 @@ class GameScene: BaseScene {
 			
 			ground.run(moveGroundsForever)
 			
-			movingObjects.addChild(ground)
+			grounds.addChild(ground)
 		}
 		
 		// Sky contact
@@ -426,7 +429,7 @@ class GameScene: BaseScene {
 		// playSound(gameStartSound)
 		
 		tutorial.run(SKAction.sequence([
-			SKAction.fadeOut(withDuration: 0.2),
+			SKAction.fadeOut(withDuration: 0.3),
 			SKAction.removeFromParent()
 		]))
 		

@@ -68,7 +68,7 @@ class GameViewController: UIViewController {
 				sceneNode.graphs = scene.graphs
 				
 				// Set the scale mode to scale to fit the window
-				sceneNode.scaleMode = .resizeFill
+				// sceneNode.scaleMode = .resizeFill
 				
 				// Present the scene
 				skView.presentScene(sceneNode)

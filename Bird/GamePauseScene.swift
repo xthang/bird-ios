@@ -11,7 +11,7 @@ class GamePauseScene: SceneOverlay {
 	private let TAG = "\(GamePauseScene.self)"
 	
 	private lazy var buttons = childNode(withName: "Buttons")!
-	private lazy var btnResume = buttons.childNode(withName: "Resume") as! ButtonNode
+	private lazy var btnResume = buttons.childNode(withName: ButtonIdentifier.resume.rawValue) as! ButtonNode
 	
 	
 	override func sceneDidLoad(_ tag: String) {

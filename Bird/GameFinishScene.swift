@@ -29,14 +29,19 @@ class GameFinishScene: SceneOverlay {
 	private var twinkles = SKNode()
 	
 	private lazy var buttons = childNode(withName: "Buttons")!
-	private lazy var btnNewGame = buttons.childNode(withName: "Play") as! ButtonNode
-	private lazy var btnLeaderboards = buttons.childNode(withName: "Leaderboards") as! ButtonNode
-	private lazy var btnHome = buttons.childNode(withName: "Home") as! ButtonNode
-	private lazy var btnShare = buttons.childNode(withName: "Share") as! ButtonNode
+	private lazy var btnNewGame = buttons.childNode(withName: ButtonIdentifier.play.rawValue) as! ButtonNode
+	private lazy var btnLeaderboards = buttons.childNode(withName: ButtonIdentifier.leaderboards.rawValue) as! ButtonNode
+	private lazy var btnHome = buttons.childNode(withName: ButtonIdentifier.home.rawValue) as! ButtonNode
+	private lazy var btnShare = buttons.childNode(withName: ButtonIdentifier.share.rawValue) as! ButtonNode
+	
+	private let swooshSound = SKAudioNode(fileNamed: "sfx_swooshing")
 	
 	
 	override func sceneDidLoad(_ tag: String) {
 		super.sceneDidLoad(tag)
+		
+		addChild(swooshSound)
+		swooshSound.autoplayLooped = false
 		
 		buttons.children.forEach {
 			let b = $0 as! ButtonNode
@@ -180,11 +185,12 @@ class GameFinishScene: SceneOverlay {
 		gameOverText.run(SKAction.move(to: CGPoint(x: 0, y: scene.frame.height * 0.25), duration: 0.15)) { [weak self] in
 			self!.scorePanel.run(SKAction.move(to: CGPoint(x: 0, y: scene.frame.height * 0), duration: 0.3)) { [weak self] in
 				self!.runScore()
-				self!.buttons.run(SKAction.move(to: CGPoint(x: 0, y: -scene.frame.height * 0.2), duration: 0.15)) { [weak self] in
+				self!.buttons.run(SKAction.move(to: CGPoint(x: 0, y: -scene.frame.height * 0.22), duration: 0.15)) { [weak self] in
 					self!.didShow("")
 				}
 			}
 		}
+		(self.scene as! BaseSKScene).playSound(self.swooshSound)
 	}
 	
 	private func runScore() {
