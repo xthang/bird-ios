@@ -17,6 +17,7 @@ class GameFinishScene: SceneOverlay {
 			scoreLabel.text = "\(loadingScore)"
 		}
 	}
+	private var isNewBest = false
 	
 	// Nodes
 	private lazy var gameOverText = childNode(withName: "GameOver") as! SKSpriteNode
@@ -112,9 +113,9 @@ class GameFinishScene: SceneOverlay {
 		
 		let best = UserDefaults.standard.integer(forKey: CommonConfig.Keys.bestScore)
 		let newBest = max(best, self.score)
-		UserDefaults.standard.set(newBest, forKey: CommonConfig.Keys.bestScore)
-		self.bestScoreLabel.text = "\(newBest)"
-		self.newLabel.isHidden = best >= score
+		if newBest != best { UserDefaults.standard.set(newBest, forKey: CommonConfig.Keys.bestScore) }
+		bestScoreLabel.text = "\(newBest)"
+		isNewBest = best < score
 	}
 	
 	override func willMove(_ tag: String, to scene: SKScene) {
@@ -162,6 +163,7 @@ class GameFinishScene: SceneOverlay {
 			let theta = (CGFloat(arc4random()) / CGFloat(UInt32.max)) * 2 * Double.pi
 			$0.position = CGPoint(x: r * cos(theta), y: r * sin(theta))
 		}
+		twinkles.isHidden = true
 		
 		buttons.children.forEach {
 			let b = $0 as! ButtonNode
@@ -205,8 +207,9 @@ class GameFinishScene: SceneOverlay {
 		run(SKAction.sequence(sequence)) { [weak self] in
 			if self!.medal.texture != nil {
 				self!.medal.isHidden = false
-				//self!.twinkles.isHidden = false
 			}
+			self!.newLabel.isHidden = !self!.isNewBest
+			self!.twinkles.isHidden = !self!.isNewBest
 		}
 	}
 	

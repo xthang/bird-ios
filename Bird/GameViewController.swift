@@ -17,6 +17,8 @@ class GameViewController: UIViewController {
 	private static let TAG = "🎮"
 	private let TAG = "🎮"
 	
+	private var isFirstLoad = true
+	
 	@IBOutlet weak var devBtn: UIButton!
 	
 	// @IBOutlet weak var masterView: UIView!
@@ -28,6 +30,10 @@ class GameViewController: UIViewController {
 	
 	private var lastShowAdInterstitial = Date()
 	private var lastShowAdInterstitialGameNo = UserDefaults.standard.integer(forKey: CommonConfig.Keys.gameLevel) - 1
+	
+	override var prefersStatusBarHidden: Bool {
+		return true
+	}
 	
 	
 	override func viewDidLoad() {
@@ -42,6 +48,8 @@ class GameViewController: UIViewController {
 		
 		NotificationCenter.default.addObserver(self, selector: #selector(self.adsStatusChanged(_:)), name: .AdsStatusChanged, object: nil)
 		
+		NotificationCenter.default.addObserver(self, selector: #selector(self.homeEntered), name: .homeEntered, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(self.gameLevelEntered), name: .levelEntered, object: nil)
 		NotificationCenter.default.addObserver(self, selector: #selector(self.gameLevelFinished), name: .levelFinished, object: nil)
 	}
 	
@@ -50,7 +58,7 @@ class GameViewController: UIViewController {
 		welcomeView.onCompletion { [weak self] in
 			self?.loadScene("showWelcome")
 			
-			self?.adsStatusChanged("showWelcome", !Helper.adsRemoved)
+			// self?.checkAndUpdateAdsBanner("showWelcome", !Helper.adsRemoved)
 		}
 		view.addSubview(welcomeView)
 	}
@@ -136,8 +144,10 @@ class GameViewController: UIViewController {
 			self.adInterstitial = AdInterstitial.shared
 		}
 		
-		if UserDefaults.standard.object(forKey: CommonConfig.Keys.welcomeVersion) != nil {
-			adsStatusChanged("viewDidAppear", !Helper.adsRemoved)
+		// for the first time run, HomeScene can not post Notification.homeEntered
+		if isFirstLoad && UserDefaults.standard.object(forKey: CommonConfig.Keys.welcomeVersion) != nil {
+			isFirstLoad = false
+			checkAndUpdateAdsBanner("viewDidAppear", !Helper.adsRemoved, position: .top)
 		}
 	}
 	
@@ -149,6 +159,12 @@ class GameViewController: UIViewController {
 		coordinator.animate(alongsideTransition: { [weak self] _ in
 			self?.adBanner?.reloadAd("\(self!.TAG)|viewWillTransition")
 		})
+	}
+	
+	override func didReceiveMemoryWarning() {
+		NSLog("!-  \(TAG) | didReceiveMemoryWarning")
+		super.didReceiveMemoryWarning()
+		// Release any cached data, images, etc that aren't in use.
 	}
 	
 	@objc private func deactivate(_ noti: NSNotification) {
@@ -164,7 +180,6 @@ class GameViewController: UIViewController {
 		skView.isPaused = false
 		(skView.scene as? BaseScene)?.activate("\(TAG)|activate", noti)
 		
-		adsStatusChanged("activate", !Helper.adsRemoved)
 		// if !Helper.isFirstRun { rewardDaily("activate") }
 	}
 	
@@ -175,26 +190,46 @@ class GameViewController: UIViewController {
 		skView.scene?.pressesDidBegin(presses, with: event)
 	}
 	
-	private func updateAdsBanner(_ tag: String, _ on: Bool) {
+	private func updateAdsBanner(_ tag: String, _ on: Bool, position: BannerPosition? = nil) {
+		if adBanner == nil {
+			print("--  \(TAG) | updateAdsBanner [\(tag)]: adBanner is null")
+			return
+		}
+		
 		if on {
-			adBanner?.show("\(TAG)|updateAdsBanner|\(tag)", viewController: self, position: .bottom) // allCases.randomElement()
+			adBanner?.show("\(TAG)|updateAdsBanner|\(tag)", viewController: self, position: position) // allCases.randomElement()
 		} else {
 			adBanner?.remove("\(TAG)|updateAdsBanner|\(tag)")
 		}
 	}
 	
-	private func adsStatusChanged(_ tag: String, _ on: Bool) {
-		NSLog("--  \(TAG) | adsStatusChanged [\(tag)]: on: \(on)")
+	// check some conditions before update Ads
+	private func checkAndUpdateAdsBanner(_ tag: String, _ on: Bool, position: BannerPosition? = nil) {
+		NSLog("--  \(TAG) | checkAndUpdateAdsBanner [\(tag)]: on: \(on)")
 		
 		if on {
-			updateAdsBanner("adsStatusChanged|\(tag)", on)
+			updateAdsBanner("checkAndUpdateAdsBanner|\(tag)", on, position: position)
 			return
 		}
-		updateAdsBanner("adsStatusChanged|\(tag)", false)
+		updateAdsBanner("checkAndUpdateAdsBanner|\(tag)", false)
 	}
 	
 	@objc private func adsStatusChanged(_ notification: NSNotification) {
-		adsStatusChanged("notification", notification.object as! Bool)
+		checkAndUpdateAdsBanner("notification", notification.object as! Bool, position: .top)
+	}
+	
+	@objc private func homeEntered(_ notification: NSNotification) {
+		NSLog("--  \(TAG) | homeEntered: \(hash) - \(notification.object ?? "--")")
+		
+		if Helper.adsRemoved { return }
+		
+		checkAndUpdateAdsBanner("homeEntered", true, position: .top)
+	}
+	
+	@objc private func gameLevelEntered(_ notification: NSNotification) {
+		NSLog("--  \(TAG) | gameLevelEntered: \(hash) - \(notification.object ?? "--")")
+		
+		updateAdsBanner("gameLevelEntered", false)
 	}
 	
 	@objc private func gameLevelFinished(_ notification: NSNotification) {
@@ -209,7 +244,7 @@ class GameViewController: UIViewController {
 		if Helper.adsRemoved { return }
 		
 		if level >= 0 {
-			updateAdsBanner("gameLevelFinished", true)
+			updateAdsBanner("gameLevelFinished", true, position: .bottom)
 		}
 	}
 	
@@ -219,8 +254,8 @@ class GameViewController: UIViewController {
 		NSLog("--  \(TAG) | showAdInterstitial [\(tag)]: gameNo: \(gameNo) | last: \(lastShowAdInterstitialGameNo) ~ \(lastShowAdInterstitial)")
 		
 		let d = Date()
-		if gameNo >= 4
-				&& (((gameNo - 1) % 3 == 0 && d.timeIntervalSince(lastShowAdInterstitial) > 90)
+		if gameNo >= 6
+				&& (((gameNo - 1) % 5 == 0 && d.timeIntervalSince(lastShowAdInterstitial) > 90)
 					 || gameNo - lastShowAdInterstitialGameNo >= 4) {
 			if adInterstitial.present("\(TAG)|gameLevelFinished", in: self) {
 				lastShowAdInterstitial = d

@@ -88,6 +88,7 @@ class DEV: PopupView {
 		
 		UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.gamesCount)
 		UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.gameLevel)
+		UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.bestScore)
 		
 		UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.coinCount)
 		UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.purchased)

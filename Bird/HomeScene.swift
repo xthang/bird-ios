@@ -9,7 +9,7 @@ import XLibrary
 
 class HomeScene: BaseScene {
 	
-	private let TAG = "🎲"
+	private let TAG = "🏠"
 	
 	private var sceneLoaded = false
 	
@@ -46,6 +46,8 @@ class HomeScene: BaseScene {
 		resizeScene("didMove")
 		
 		sceneLoaded = true
+		
+		NotificationCenter.default.post(name: .homeEntered, object: nil)
 		
 		SceneManager.prepareScene(.game)
 	}
@@ -89,7 +91,7 @@ class HomeScene: BaseScene {
 		title.setScale(mainCharacter.xScale)
 		title.position.x = -self.frame.width * 0.07
 		
-		banner.position.y = frame.height * 0.32
+		banner.position.y = frame.height * 0.27
 		
 		let hop = SKAction.moveBy(x: 0, y: mainCharacter.size.height * 0.5, duration: 0.3)
 		banner.run(SKAction.repeatForever(SKAction.sequence([hop, hop.reversed()])), withKey: "hop")

@@ -121,6 +121,8 @@ class GameScene: BaseScene {
 		stateMachine.enter(LevelSceneActiveState.self)
 		
 		sceneLoaded = true
+		
+		NotificationCenter.default.post(name: .levelEntered, object: gameNo)
 	}
 	
 	override func didChangeSize(_ oldSize: CGSize) {
