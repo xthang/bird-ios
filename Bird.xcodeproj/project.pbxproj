@@ -59,6 +59,7 @@
 		B57E7984277F01EC0071F4DA /* sfx_die.wav in Resources */ = {isa = PBXBuildFile; fileRef = B57E797F277F01EC0071F4DA /* sfx_die.wav */; };
 		B5BFC0C3278291AE00F831A4 /* GameFinishScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = B5BFC0C2278291AE00F831A4 /* GameFinishScene.sks */; };
 		B5BFC0C52782A88600F831A4 /* GamePauseScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = B5BFC0C42782A88600F831A4 /* GamePauseScene.sks */; };
+		B5F9C61327859D9700A1619C /* 6pxbus.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B5F9C61227859D9700A1619C /* 6pxbus.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -136,6 +137,7 @@
 		B57E797F277F01EC0071F4DA /* sfx_die.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sfx_die.wav; sourceTree = "<group>"; };
 		B5BFC0C2278291AE00F831A4 /* GameFinishScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameFinishScene.sks; sourceTree = "<group>"; };
 		B5BFC0C42782A88600F831A4 /* GamePauseScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GamePauseScene.sks; sourceTree = "<group>"; };
+		B5F9C61227859D9700A1619C /* 6pxbus.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = 6pxbus.ttf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -258,14 +260,14 @@
 		B569AFFD277AB8F80057B873 /* common */ = {
 			isa = PBXGroup;
 			children = (
-				B569AFFE277AB8F80057B873 /* SceneButton.swift */,
-				B569AFFF277AB8F80057B873 /* ButtonNode.swift */,
-				B569B000277AB8F80057B873 /* Extensions.swift */,
-				B569B001277AB8F80057B873 /* BaseScene.swift */,
 				B569B002277AB8F80057B873 /* CommonConfig.swift */,
-				B569B003277AB8F80057B873 /* SceneOverlayView.swift */,
 				B569B004277AB8F80057B873 /* AppConfig.swift */,
 				B569B039277AC40F0057B873 /* Helper.swift */,
+				B569B000277AB8F80057B873 /* Extensions.swift */,
+				B569AFFE277AB8F80057B873 /* SceneButton.swift */,
+				B569AFFF277AB8F80057B873 /* ButtonNode.swift */,
+				B569B001277AB8F80057B873 /* BaseScene.swift */,
+				B569B003277AB8F80057B873 /* SceneOverlayView.swift */,
 			);
 			path = common;
 			sourceTree = "<group>";
@@ -303,6 +305,7 @@
 		B569B014277AB8F90057B873 /* fonts */ = {
 			isa = PBXGroup;
 			children = (
+				B5F9C61227859D9700A1619C /* 6pxbus.ttf */,
 			);
 			path = fonts;
 			sourceTree = "<group>";
@@ -452,6 +455,7 @@
 				B569AFD5277AAFA40057B873 /* Products.plist in Resources */,
 				B5BFC0C3278291AE00F831A4 /* GameFinishScene.sks in Resources */,
 				B57E7984277F01EC0071F4DA /* sfx_die.wav in Resources */,
+				B5F9C61327859D9700A1619C /* 6pxbus.ttf in Resources */,
 				B569B033277AB8F90057B873 /* button.wav in Resources */,
 				B569B02A277AB8F90057B873 /* HomeScene.sks in Resources */,
 				B57E7982277F01EC0071F4DA /* sfx_wing.wav in Resources */,
@@ -691,17 +695,19 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Bird/Bird.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = test;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 378Y5XR992;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Bird/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Flappy Bird";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -724,17 +730,19 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Bird/Bird.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = test;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 378Y5XR992;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Bird/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Flappy Bird";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

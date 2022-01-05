@@ -28,6 +28,7 @@ class HomeScene: BaseScene {
 	private lazy var btnPlay = buttons.childNode(withName: ButtonIdentifier.play.rawValue) as! ButtonNode
 	private lazy var btnLeaderboards = buttons.childNode(withName: ButtonIdentifier.leaderboards.rawValue) as! ButtonNode
 	private lazy var btnRate = buttons.childNode(withName: ButtonIdentifier.rate.rawValue) as! ButtonNode
+	private lazy var btnAds = buttons.childNode(withName: ButtonIdentifier.ads.rawValue) as! ButtonNode
 	
 	
 	override func sceneDidLoad() {
@@ -86,10 +87,10 @@ class HomeScene: BaseScene {
 		// Bird
 		let mainCharTextureSize = mainCharacter.texture!.size()
 		mainCharacter.setScale(min(frame.width * 0.12 / mainCharTextureSize.width, frame.height * 0.06 / mainCharTextureSize.height))
-		mainCharacter.position.x = self.frame.width * 0.35
 		
 		title.setScale(mainCharacter.xScale)
-		title.position.x = -self.frame.width * 0.07
+		title.position.x = -title.size.width * 0.17
+		mainCharacter.position.x = title.size.width * 0.57
 		
 		banner.position.y = frame.height * 0.27
 		
@@ -110,18 +111,18 @@ class HomeScene: BaseScene {
 		bgTexture.filteringMode = .nearest
 		
 		let bgTextureSize = bgTexture.size()
-		let bgSize = CGSize(width: max(frame.width, frame.height * bgTextureSize.width / bgTextureSize.height),
-								  height: max(frame.height, frame.width * bgTextureSize.height / bgTextureSize.width))
+		let bgWidth = max(frame.width, frame.height * bgTextureSize.width / bgTextureSize.height)
+		let bgHeight = max(frame.height, frame.width * bgTextureSize.height / bgTextureSize.width)
 		
-		let moveBg = SKAction.moveBy(x: -bgSize.width, y: 0, duration: TimeInterval(bgSize.width / BG_VELOCITY))
-		let resetBg = SKAction.moveBy(x: bgSize.width, y: 0, duration: 0.0)
+		let moveBg = SKAction.moveBy(x: -bgWidth, y: 0, duration: TimeInterval(bgWidth / BG_VELOCITY))
+		let resetBg = SKAction.moveBy(x: bgWidth, y: 0, duration: 0.0)
 		let moveBgsForever = SKAction.repeatForever(SKAction.sequence([moveBg, resetBg]))
 		
 		for i in 0 ..< 2 + Int(self.frame.width / ( bgTexture.size().width * 2 )) {
 			let node = SKSpriteNode(texture: bgTexture)
 			
-			node.size = bgSize
-			node.position = CGPoint(x: CGFloat(i) * node.size.width, y: 0)
+			node.size = CGSize(width: bgWidth + 1, height: bgHeight)
+			node.position = CGPoint(x: CGFloat(i) * bgWidth, y: 0)
 			
 			node.run(moveBgsForever)
 			
@@ -137,45 +138,47 @@ class HomeScene: BaseScene {
 		groundTexture.filteringMode = .nearest
 		
 		let groundTextureSize = groundTexture.size()
-		let groundSize = CGSize(width: frame.width,
-										height: frame.width * groundTextureSize.height / groundTextureSize.width)
-		let GROUND_HEIGHT_ON_DISPLAY = min(groundSize.height, frame.height * 0.2)
+		let groundWidth = frame.width
+		let groundHeight = frame.width * groundTextureSize.height / groundTextureSize.width
+		let GROUND_HEIGHT_ON_DISPLAY = min(groundHeight, frame.height * 0.2)
 		
-		let moveGround = SKAction.moveBy(x: -groundSize.width, y: 0, duration: TimeInterval(groundSize.width / VELOCITY))
-		let resetGround = SKAction.moveBy(x: groundSize.width, y: 0, duration: 0.0)
+		let moveGround = SKAction.moveBy(x: -groundWidth, y: 0, duration: TimeInterval(groundWidth / VELOCITY))
+		let resetGround = SKAction.moveBy(x: groundWidth, y: 0, duration: 0.0)
 		let moveGroundsForever = SKAction.repeatForever(SKAction.sequence([moveGround, resetGround]))
 		
-		for i in 0 ... 1 + Int(self.frame.height / groundSize.width) {
+		for i in 0 ... 1 + Int(self.frame.height / groundWidth) {
 			let ground = SKSpriteNode(texture: groundTexture)
 			ground.name = "ground"
-			ground.size = groundSize
-			ground.position = CGPoint( x: CGFloat(i) * ground.size.width, y: -frame.height/2 - ground.size.height/2 + GROUND_HEIGHT_ON_DISPLAY )
+			ground.size = CGSize(width: groundWidth + 1, height: groundHeight)
+			ground.position = CGPoint( x: CGFloat(i) * groundWidth, y: -frame.height/2 - groundHeight/2 + GROUND_HEIGHT_ON_DISPLAY )
 			
 			ground.run(moveGroundsForever)
 			
 			grounds.addChild(ground)
 		}
 		
-		copyright.fontSize = min(frame.height * 0.03, frame.width * 0.06)
+		copyright.fontSize = min(frame.height * 0.025, frame.width * 0.04)
 		copyright.position.y = grounds.children.first!.frame.maxY - grounds.children.first!.frame.height * 0.35
 		copyright.zPosition = GameLayer.navigation.rawValue
 		
 		[btnPlay, btnLeaderboards].forEach { b in
 			let btnTextureSize = b.imgNode!.texture!.size()
-			let scale = min(frame.height * 0.15 / btnTextureSize.height, frame.width * 0.3 / btnTextureSize.width)
-			b.imgNode!.size = CGSize(width: btnTextureSize.width * scale, height: btnTextureSize.height * scale)
+			let scale = min(frame.height * 0.12 / btnTextureSize.height, frame.width * 0.3 / btnTextureSize.width)
+			b.imgNode!.setScale(scale)
+		}
+		[btnRate, btnAds].forEach { b in
+			let scale = btnPlay.imgNode!.xScale * 1
+			b.imgNode!.setScale(scale)
+		}
+		buttons.children.forEach {
+			let b = $0 as! ButtonNode
 			b.size = CGSize(width: b.imgNode!.size.width + 3, height: b.imgNode!.size.height + 3)
 		}
-		[btnRate].forEach { b in
-			let btnTextureSize = b.imgNode!.texture!.size()
-			let scale = min(frame.height * 0.12 / btnTextureSize.height, frame.width * 0.26 / btnTextureSize.width)
-			b.imgNode!.size = CGSize(width: btnTextureSize.width * scale, height: btnTextureSize.height * scale)
-			b.size = CGSize(width: b.imgNode!.size.width + 3, height: b.imgNode!.size.height + 3)
-		}
-		btnPlay.position = CGPoint(x: -frame.width * 0.22, y: -btnPlay.size.height * 1)
-		btnLeaderboards.position = CGPoint(x: frame.width * 0.22, y: btnPlay.position.y)
-		btnRate.position = CGPoint(x: 0, y: 0)
+		btnPlay.position = CGPoint(x: -frame.width * 0.22, y: 0)
+		btnLeaderboards.position = CGPoint(x: frame.width * 0.22, y: 0)
+		btnRate.position = CGPoint(x: 0, y: btnPlay.size.height * 0.9)
+		btnAds.position = CGPoint(x: 0, y: -btnPlay.size.height * 0.9)
 		
-		buttons.position.y = -frame.height * 0.1
+		buttons.position.y = -frame.height * 0.15
 	}
 }

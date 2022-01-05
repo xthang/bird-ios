@@ -1,6 +1,7 @@
 {
   "images" : [
     {
+      "filename" : "window-frame.png",
       "idiom" : "universal",
       "scale" : "1x"
     },

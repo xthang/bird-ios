@@ -12,6 +12,8 @@ class DEV: PopupView {
 	
 	private var keyboardConstraint: NSLayoutConstraint!
 	
+	@IBOutlet weak var info: UILabel!
+	
 	@IBOutlet weak var levelTextField: UITextField!
 	
 	@IBOutlet weak var logo: UIView!
@@ -29,6 +31,16 @@ class DEV: PopupView {
 	
 	override func awakeFromNib() {
 		super.awakeFromNib()
+		
+		info.text = "- appDataVersion: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.appDataVersion) ?? "--")"
+		info.text! += "\n- welcomeVersion: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.welcomeVersion) ?? "--")"
+		
+		info.text! += "\n\n- gamesCount: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.gamesCount) ?? "--")"
+		info.text! += "\n- gameLevel: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.gameLevel) ?? "--")"
+		info.text! += "\n- bestScore: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.bestScore) ?? "--")"
+		
+		info.text! += "\n\n- coinCount: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.coinCount) ?? "--")"
+		info.text! += "\n- purchased: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.purchased) ?? "--")"
 		
 		let stretchedImg = resizeImageToFit("awakeFromNib", circleImage, size: circle.frame.size, aspect: Float(circle.frame.width / circle.frame.height))
 		circle.image = stretchedImg

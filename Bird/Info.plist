@@ -277,6 +277,13 @@
 			<string>w9q455wk68.skadnetwork</string>
 		</dict>
 	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>6pxbus.ttf</string>
+		<string>Maniac.ttf</string>
+		<string>NinePin - DGL.ttf</string>
+		<string>FVF Fernando 08.ttf</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

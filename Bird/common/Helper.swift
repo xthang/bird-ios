@@ -14,6 +14,7 @@ class AppHelper: IHelper {
 		var data: [String: Any] = Helper.buildUserActivitiesInfo(tag, &err)
 		
 		data["game_level"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.gameLevel) as? Int
+		data["best_score"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.bestScore) as? Int
 		
 		NSLog("--> \(TAG) | build User Activities Info [\(tag)]: \(data)")
 		

@@ -14,9 +14,11 @@ enum GameLayer: CGFloat {
 	
 	enum ObjectLayer: CGFloat {
 		case sky = 0
-		case obstacle = 1
+		case obstacle = 5
 		case ground = 20
 	}
+	
+	case flash = 2
 	
 	case mainCharacter = 10
 	case score = 80
@@ -74,6 +76,8 @@ class GameScene: BaseScene {
 	
 	private lazy var movingObjects = root.childNode(withName: "MovingObjects")!
 	private lazy var movingObstacles = movingObjects.childNode(withName: "MovingObstacles")!
+	
+	private lazy var flash = root.childNode(withName: "flash") as! SKSpriteNode
 	
 	// Node templates
 	private let groundObstacleTemp1 = SKSpriteNode(imageNamed: "pipe_up_1")
@@ -216,6 +220,10 @@ class GameScene: BaseScene {
 		
 		movingObstacles.speed = 0
 		
+		flash.zPosition = GameLayer.flash.rawValue
+		flash.alpha = 0.7
+		flash.isHidden = true
+		
 		groundObstacleTemp1.texture!.filteringMode = .nearest
 		groundObstacleTemp2.texture!.filteringMode = .nearest
 		skyObstacleTemp1.texture!.filteringMode = .nearest
@@ -267,27 +275,30 @@ class GameScene: BaseScene {
 		background.removeAllChildren()
 		background.zPosition = GameLayer.ObjectLayer.sky.rawValue
 		
-		let bgTexture = SKTexture(imageNamed: "bg_day")
+		let hour = Calendar.current.component(.hour, from: Date())
+		let bgTexture = SKTexture(imageNamed: hour >= 23 || hour <= 2 ? "bg_night" : "bg_day")
 		bgTexture.filteringMode = .nearest
 		
 		let bgTextureSize = bgTexture.size()
-		let bgSize = CGSize(width: max(frame.width, frame.height * bgTextureSize.width / bgTextureSize.height),
-								  height: max(frame.height, frame.width * bgTextureSize.height / bgTextureSize.width))
+		let bgWidth = max(frame.width, frame.height * bgTextureSize.width / bgTextureSize.height)
+		let bgHeight = max(frame.height, frame.width * bgTextureSize.height / bgTextureSize.width)
 		
-		let moveBg = SKAction.moveBy(x: -bgSize.width, y: 0, duration: TimeInterval(bgSize.width / BG_VELOCITY))
-		let resetBg = SKAction.moveBy(x: bgSize.width, y: 0, duration: 0.0)
+		let moveBg = SKAction.moveBy(x: -bgWidth, y: 0, duration: TimeInterval(bgWidth / BG_VELOCITY))
+		let resetBg = SKAction.moveBy(x: bgWidth, y: 0, duration: 0.0)
 		let moveBgsForever = SKAction.repeatForever(SKAction.sequence([moveBg, resetBg]))
 		
 		for i in 0 ..< 2 + Int(self.frame.width / ( bgTexture.size().width * 2 )) {
 			let node = SKSpriteNode(texture: bgTexture)
 			
-			node.size = bgSize
-			node.position = CGPoint(x: CGFloat(i) * node.size.width, y: 0)
+			node.size = CGSize(width: bgWidth + 1, height: bgHeight)
+			node.position = CGPoint(x: CGFloat(i) * bgWidth, y: 0)
 			
 			node.run(moveBgsForever)
 			
 			background.addChild(node)
 		}
+		
+		flash.size = frame.size
 		
 		// ground
 		let grounds = movingObjects.childNode(withName: "ground")!
@@ -298,19 +309,19 @@ class GameScene: BaseScene {
 		groundTexture.filteringMode = .nearest
 		
 		let groundTextureSize = groundTexture.size()
-		let groundSize = CGSize(width: frame.width,
-										height: frame.width * groundTextureSize.height / groundTextureSize.width)
-		GROUND_HEIGHT_ON_DISPLAY = min(groundSize.height, frame.height * 0.2)
+		let groundWidth = frame.width
+		let groundHeight = frame.width * groundTextureSize.height / groundTextureSize.width
+		GROUND_HEIGHT_ON_DISPLAY = min(groundHeight, frame.height * 0.2)
 		
-		let moveGround = SKAction.moveBy(x: -groundSize.width, y: 0, duration: TimeInterval(groundSize.width / VELOCITY))
-		let resetGround = SKAction.moveBy(x: groundSize.width, y: 0, duration: 0.0)
+		let moveGround = SKAction.moveBy(x: -groundWidth, y: 0, duration: TimeInterval(groundWidth / VELOCITY))
+		let resetGround = SKAction.moveBy(x: groundWidth, y: 0, duration: 0.0)
 		let moveGroundsForever = SKAction.repeatForever(SKAction.sequence([moveGround, resetGround]))
 		
-		for i in 0 ... 1 + Int(self.frame.height / groundSize.width) {
+		for i in 0 ... 1 + Int(self.frame.height / groundWidth) {
 			let ground = SKSpriteNode(texture: groundTexture)
 			ground.name = "ground"
-			ground.size = groundSize
-			ground.position = CGPoint( x: CGFloat(i) * ground.size.width, y: -frame.height/2 - ground.size.height/2 + GROUND_HEIGHT_ON_DISPLAY )
+			ground.size = CGSize(width: groundWidth + 1, height: groundHeight)
+			ground.position = CGPoint( x: CGFloat(i) * groundWidth, y: -frame.height/2 - groundHeight/2 + GROUND_HEIGHT_ON_DISPLAY )
 			
 			ground.physicsBody = SKPhysicsBody(rectangleOf: ground.size)
 			ground.physicsBody!.isDynamic = false
@@ -506,6 +517,14 @@ class GameScene: BaseScene {
 		mainCharacter.physicsBody!.collisionBitMask = groundCategory // in case bird lands on top of pipe
 		mainCharacter.physicsBody!.velocity.dx = 0
 		
+		flash.run(SKAction.repeat(SKAction.sequence([
+				SKAction.unhide(),
+				SKAction.wait(forDuration: 0.1),
+				SKAction.hide(),
+				SKAction.wait(forDuration: 0.1)
+			]), count: 2)
+		)
+		
 		playSound(dieSound, delay: 0.3)
 	}
 	
@@ -520,23 +539,13 @@ class GameScene: BaseScene {
 		
 		dieSound.removeAllActions()
 		
-		let background = movingObjects.childNode(withName: "background")!
-		backgroundColor = SKColor(red: 0.1, green: 0, blue: 0.1, alpha: 1.0)
-		run(SKAction.sequence([
-			SKAction.repeat(SKAction.sequence([
-				SKAction.run { background.alpha = 0.7 },
-				SKAction.wait(forDuration: 0.1),
-				SKAction.run { background.alpha = 1 },
-				SKAction.wait(forDuration: 0.1)
-			]), count: 3),
-			SKAction.wait(forDuration: 0.8),
-		])) { [weak self] in
+		run(SKAction.wait(forDuration: 0.8)) { [weak self] in
 			self!.root.speed = 0
 			self!.scoreLabel.isHidden = true
 			
 			let _ = ScoreData.insert(self!.TAG, Score(self!.score))
 			GameCenterHelper.reportAchievement(self!.TAG, "game_\(self!.gameNo!)")
-			GameCenterHelper.reportAchievement(self!.TAG, "score_\(self!.gameNo!)")
+			GameCenterHelper.reportAchievement(self!.TAG, "score_\(self!.score)")
 			GameCenterHelper.submitScore(self!.TAG, self!.score)
 			
 			self!.stateMachine.enter(LevelSceneFinishState.self)

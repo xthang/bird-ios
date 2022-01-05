@@ -5,7 +5,7 @@
 	<key>AppID</key>
 	<integer>9</integer>
 	<key>AppleID</key>
-	<string></string>
+	<string>1603402016</string>
 	<key>AboutURL</key>
 	<string>https://xthang.xyz/games/bird/about.html</string>
 	<key>ShareURL</key>
@@ -23,7 +23,7 @@
 		<key>Leaderboards</key>
 		<dict>
 			<key>All</key>
-			<string>all_players</string>
+			<string>x_bird_all_players</string>
 		</dict>
 		<key>Achievements</key>
 		<dict>
@@ -60,7 +60,7 @@
 	<key>UnityAppID</key>
 	<string></string>
 	<key>UnityGameID</key>
-	<string></string>
+	<string>4544894</string>
 	<key>UnityAdEnabled</key>
 	<true/>
 	<key>UnityAdUnits</key>

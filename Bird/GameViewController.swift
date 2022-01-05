@@ -29,7 +29,7 @@ class GameViewController: UIViewController {
 	private var adInterstitial: AdInterstitial!
 	
 	private var lastShowAdInterstitial = Date()
-	private var lastShowAdInterstitialGameNo = UserDefaults.standard.integer(forKey: CommonConfig.Keys.gameLevel) - 1
+	private var lastShowAdInterstitialGameNo = UserDefaults.standard.integer(forKey: CommonConfig.Keys.gamesCount) - 1
 	
 	override var prefersStatusBarHidden: Bool {
 		return true
@@ -83,15 +83,15 @@ class GameViewController: UIViewController {
 				
 				skView.ignoresSiblingOrder = true
 				
-				skView.showsFPS = true
-				skView.showsDrawCount = true
-				skView.showsNodeCount = true
-				skView.showsQuadCount = true
-				skView.showsPhysics = true
-				skView.showsFields = true
-				if #available(iOS 13.0, *) {
-					skView.showsLargeContentViewer = true
-				}
+				//skView.showsFPS = true
+				//skView.showsDrawCount = true
+				//skView.showsNodeCount = true
+				//skView.showsQuadCount = true
+				//skView.showsPhysics = true
+				//skView.showsFields = true
+				//if #available(iOS 13.0, *) {
+				//	skView.showsLargeContentViewer = true
+				//}
 			}
 		}
 		
@@ -237,7 +237,7 @@ class GameViewController: UIViewController {
 		
 		let level = notification.object as! Int
 		
-		if #available(iOS 10.3, *), level >= 20 && level % 10 == 0 {
+		if #available(iOS 10.3, *), level >= 20 && (level + 30) % 50 == 0 {
 			SKStoreReviewController.requestReviewInCurrentScene("\(TAG)|gameLevelFinished")
 		}
 		
@@ -254,9 +254,9 @@ class GameViewController: UIViewController {
 		NSLog("--  \(TAG) | showAdInterstitial [\(tag)]: gameNo: \(gameNo) | last: \(lastShowAdInterstitialGameNo) ~ \(lastShowAdInterstitial)")
 		
 		let d = Date()
-		if gameNo >= 6
-				&& (((gameNo - 1) % 5 == 0 && d.timeIntervalSince(lastShowAdInterstitial) > 90)
-					 || gameNo - lastShowAdInterstitialGameNo >= 4) {
+		if gameNo >= 20
+				&& (((gameNo - 0) % 10 == 0 && d.timeIntervalSince(lastShowAdInterstitial) > 90)
+					 || gameNo - lastShowAdInterstitialGameNo >= 12) {
 			if adInterstitial.present("\(TAG)|gameLevelFinished", in: self) {
 				lastShowAdInterstitial = d
 				lastShowAdInterstitialGameNo = gameNo

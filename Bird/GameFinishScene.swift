@@ -12,12 +12,14 @@ class GameFinishScene: SceneOverlay {
 	
 	private var gameNo: Int!
 	private var score: Int = -1
+	private var newBestScore: Int = -1
 	private var loadingScore: Int = -1 {
 		didSet {
 			scoreLabel.text = "\(loadingScore)"
 		}
 	}
 	private var isNewBest = false
+	private var isNewMedal = false
 	
 	// Nodes
 	private lazy var gameOverText = childNode(withName: "GameOver") as! SKSpriteNode
@@ -98,24 +100,39 @@ class GameFinishScene: SceneOverlay {
 		self.gameNo = levelScene.gameNo
 		self.score = levelScene.score
 		
-		if score >= 10 {
+		let best = UserDefaults.standard.integer(forKey: CommonConfig.Keys.bestScore)
+		newBestScore = max(best, self.score)
+		if newBestScore != best { UserDefaults.standard.set(newBestScore, forKey: CommonConfig.Keys.bestScore) }
+		
+		isNewBest = best < newBestScore
+		bestScoreLabel.text = "\(best)"
+		
+		let achievement: String?
+		
+		if score >= 100 {
+			achievement = "medal_gold"
 			medal.texture = SKTexture(imageNamed: "medal_gold")
-		} else if score >= 8 {
+			isNewMedal = best < 100
+		} else if score >= 40 {
+			achievement = "medal_silver"
 			medal.texture = SKTexture(imageNamed: "medal_silver")
-		} else if score >= 6 {
+			isNewMedal = best < 40
+		} else if score >= 20 {
+			achievement = "medal_bronze"
 			medal.texture = SKTexture(imageNamed: "medal_bronze")
-		} else if score >= 4 {
+			isNewMedal = best < 20
+		} else if score >= 10 {
+			achievement = "medal_aluminum"
 			medal.texture = SKTexture(imageNamed: "medal_aluminum")
+			isNewMedal = best < 10
 		} else {
+			achievement = nil
 			medal.texture = nil
+			isNewMedal = false
 		}
 		medal.texture?.filteringMode = .nearest
 		
-		let best = UserDefaults.standard.integer(forKey: CommonConfig.Keys.bestScore)
-		let newBest = max(best, self.score)
-		if newBest != best { UserDefaults.standard.set(newBest, forKey: CommonConfig.Keys.bestScore) }
-		bestScoreLabel.text = "\(newBest)"
-		isNewBest = best < score
+		if achievement != nil { GameCenterHelper.reportAchievement(TAG, achievement!) }
 	}
 	
 	override func willMove(_ tag: String, to scene: SKScene) {
@@ -168,7 +185,7 @@ class GameFinishScene: SceneOverlay {
 		buttons.children.forEach {
 			let b = $0 as! ButtonNode
 			let btnTextureSize = b.imgNode!.texture!.size()
-			let scale = min(scene.frame.height * 0.15 / btnTextureSize.height, scene.frame.width * 0.3 / btnTextureSize.width)
+			let scale = min(scene.frame.height * 0.12 / btnTextureSize.height, scene.frame.width * 0.3 / btnTextureSize.width)
 			b.imgNode!.size = CGSize(width: btnTextureSize.width * scale, height: btnTextureSize.height * scale)
 			b.size = CGSize(width: b.imgNode!.size.width + 3, height: b.imgNode!.size.height + 3)
 		}
@@ -209,7 +226,8 @@ class GameFinishScene: SceneOverlay {
 				self!.medal.isHidden = false
 			}
 			self!.newLabel.isHidden = !self!.isNewBest
-			self!.twinkles.isHidden = !self!.isNewBest
+			self!.twinkles.isHidden = !self!.isNewMedal
+			self!.bestScoreLabel.text = "\(self!.newBestScore)"
 		}
 	}
 	
