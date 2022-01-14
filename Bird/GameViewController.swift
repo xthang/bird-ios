@@ -49,8 +49,8 @@ class GameViewController: UIViewController {
 		NotificationCenter.default.addObserver(self, selector: #selector(self.adsStatusChanged(_:)), name: .AdsStatusChanged, object: nil)
 		
 		NotificationCenter.default.addObserver(self, selector: #selector(self.homeEntered), name: .homeEntered, object: nil)
-		NotificationCenter.default.addObserver(self, selector: #selector(self.gameLevelEntered), name: .levelEntered, object: nil)
-		NotificationCenter.default.addObserver(self, selector: #selector(self.gameLevelFinished), name: .levelFinished, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(self.gameEntered), name: .gameEntered, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(self.gameFinished), name: .gameFinished, object: nil)
 	}
 	
 	private func showWelcome() {
@@ -226,13 +226,13 @@ class GameViewController: UIViewController {
 		checkAndUpdateAdsBanner("homeEntered", true, position: .top)
 	}
 	
-	@objc private func gameLevelEntered(_ notification: NSNotification) {
+	@objc private func gameEntered(_ notification: NSNotification) {
 		NSLog("--  \(TAG) | gameLevelEntered: \(hash) - \(notification.object ?? "--")")
 		
 		updateAdsBanner("gameLevelEntered", false)
 	}
 	
-	@objc private func gameLevelFinished(_ notification: NSNotification) {
+	@objc private func gameFinished(_ notification: NSNotification) {
 		NSLog("--  \(TAG) | gameLevelFinished: \(hash) - \(notification.object ?? "--")")
 		
 		let level = notification.object as! Int

@@ -14,9 +14,9 @@ class HomeScene: BaseScene {
 	private var sceneLoaded = false
 	
 	// Calculation
-	private var MAIN_CHARACTER_HEIGHT: CGFloat!
-	
-	lazy var root = childNode(withName: "root")!
+
+	// Nodes	
+	private lazy var root = childNode(withName: "root")!
 	
 	private lazy var banner = root.childNode(withName: "Banner")!
 	private lazy var title = banner.childNode(withName: "title") as! SKSpriteNode
@@ -32,7 +32,6 @@ class HomeScene: BaseScene {
 	
 	
 	override func sceneDidLoad() {
-		NSLog("--  \(TAG) | sceneDidLoad: \(hash)")
 		super.sceneDidLoad()
 		
 		scaleMode = .resizeFill
@@ -118,7 +117,7 @@ class HomeScene: BaseScene {
 		let resetBg = SKAction.moveBy(x: bgWidth, y: 0, duration: 0.0)
 		let moveBgsForever = SKAction.repeatForever(SKAction.sequence([moveBg, resetBg]))
 		
-		for i in 0 ..< 2 + Int(self.frame.width / ( bgTexture.size().width * 2 )) {
+		for i in 0 ..< 2 + Int(self.frame.width / bgWidth) {
 			let node = SKSpriteNode(texture: bgTexture)
 			
 			node.size = CGSize(width: bgWidth + 1, height: bgHeight)
@@ -146,7 +145,7 @@ class HomeScene: BaseScene {
 		let resetGround = SKAction.moveBy(x: groundWidth, y: 0, duration: 0.0)
 		let moveGroundsForever = SKAction.repeatForever(SKAction.sequence([moveGround, resetGround]))
 		
-		for i in 0 ... 1 + Int(self.frame.height / groundWidth) {
+		for i in 0 ... 1 + Int(self.frame.width / groundWidth) {
 			let ground = SKSpriteNode(texture: groundTexture)
 			ground.name = "ground"
 			ground.size = CGSize(width: groundWidth + 1, height: groundHeight)

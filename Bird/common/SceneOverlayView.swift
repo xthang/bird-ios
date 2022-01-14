@@ -11,7 +11,7 @@ class SceneOverlayView: OverlayView {
 	private let TAG = "🪟"
 	
 	enum Identifier {
-		case home, end, success, fail, pause
+		case home
 	}
 	
 	var id: Identifier!
@@ -23,14 +23,6 @@ class SceneOverlayView: OverlayView {
 		switch id {
 			case .home:
 				overlay = initiate(fileName: "HomeScene") as! SceneOverlayView
-			case .end:
-				overlay = initiate(fileName: "EndScene") as! SceneOverlayView
-			case .pause:
-				overlay = initiate(fileName: "PauseScene") as! SceneOverlayView
-			case .success:
-				overlay = initiate(fileName: "SuccessScene") as! SceneOverlayView
-			case .fail:
-				overlay = initiate(fileName: "FailScene") as! SceneOverlayView
 		}
 		overlay.id = id
 		

@@ -21,36 +21,4 @@ class ButtonNode: BaseButtonNode {
 	
 	// MARK: Responder
 	
-#if os(iOS)
-	open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-		super.touchesBegan(touches, with: event)
-		
-		isFocused = true
-	}
-	
-	open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-		super.touchesEnded(touches, with: event)
-		
-		isFocused = false
-	}
-	
-	open override func touchesCancelled(_ touches: Set<UITouch>?, with event: UIEvent?) {
-		super.touchesCancelled(touches!, with: event)
-		
-		isFocused = false
-	}
-	
-#elseif os(OSX)
-	override func mouseDown(with event: NSEvent) {
-		super.mouseDown(with: event)
-		
-		isFocused = true
-	}
-	
-	override func mouseUp(with event: NSEvent) {
-		super.mouseUp(with: event)
-		
-		isFocused = false
-	}
-#endif
 }

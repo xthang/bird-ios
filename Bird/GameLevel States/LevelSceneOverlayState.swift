@@ -40,7 +40,10 @@ class LevelSceneOverlayState: GKState {
 		// NSLog("--  \(type(of: self)) | didEnter from: \(previousState as Any? ?? "--")")
 		super.didEnter(from: previousState)
 		
-		// Provide the levelScene with a reference to the overlay node.
+		// levelScene.root.isUserInteractionEnabled = false
+		levelScene.root.speed = 0
+		levelScene.physicsWorld.speed = 0
+
 		levelScene.show(overlay)
 	}
 	

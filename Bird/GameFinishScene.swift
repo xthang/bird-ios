@@ -43,9 +43,6 @@ class GameFinishScene: SceneOverlay {
 	override func sceneDidLoad(_ tag: String) {
 		super.sceneDidLoad(tag)
 		
-		addChild(swooshSound)
-		swooshSound.autoplayLooped = false
-		
 		buttons.children.forEach {
 			let b = $0 as! ButtonNode
 			b.imgNode!.texture!.filteringMode = .nearest
@@ -94,6 +91,9 @@ class GameFinishScene: SceneOverlay {
 		
 		twinkles.zPosition = 1
 		medal.addChild(twinkles)
+		
+		addChild(swooshSound)
+		swooshSound.autoplayLooped = false
 	}
 	
 	func update(_ tag: String, levelScene: GameScene) {

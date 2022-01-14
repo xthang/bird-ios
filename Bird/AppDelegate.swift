@@ -22,7 +22,7 @@ class AppDelegate: BaseAppDelegate {
 		
 		let x = super.application(application, didFinishLaunchingWithOptions: launchOptions)
 		
-		AppConfig.initiate()
+		// AppConfig.initiate()
 		
 		_ = Payment.shared
 		_ = AdsStore.shared

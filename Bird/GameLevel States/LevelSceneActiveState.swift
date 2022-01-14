@@ -12,6 +12,8 @@ import GameplayKit
 class LevelSceneActiveState: GKState {
 	// MARK: Properties
 	
+	private let TAG = "\(LevelSceneActiveState.self)"
+	
 	unowned let levelScene: GameScene
 	
 	var timePassed: TimeInterval = 0.0
@@ -45,7 +47,7 @@ class LevelSceneActiveState: GKState {
 	// MARK: GKState Life Cycle
 	
 	override func didEnter(from previousState: GKState?) {
-		// NSLog("--  LevelSceneActiveState | didEnter from: \(previousState as Any? ?? "--")")
+		NSLog("--  \(TAG) | didEnter from: \(previousState as Any? ?? "--")")
 		super.didEnter(from: previousState)
 		
 		if previousState is LevelSceneFinishState {
@@ -57,8 +59,8 @@ class LevelSceneActiveState: GKState {
 			levelScene.gameState = .STARTED
 		}
 		
-		levelScene.setUserInteraction(true)
-		
+		levelScene.setUserInteraction("\(TAG)|didEnter", true)
+		// levelScene.root.isUserInteractionEnabled = true
 		levelScene.root.speed = 1
 		levelScene.physicsWorld.speed = 1
 	}

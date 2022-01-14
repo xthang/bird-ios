@@ -25,9 +25,6 @@ class LevelScenePauseState: LevelSceneOverlayState {
 			levelScene.gameState = .PAUSED
 		}
 		
-		levelScene.root.speed = 0
-		levelScene.physicsWorld.speed = 0
-		
 		// levelScene.save("LevelScenePauseState|didEnter")
 	}
 	

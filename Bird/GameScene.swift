@@ -33,9 +33,6 @@ class GameScene: BaseScene {
 	enum State: Int {
 		case PREPARED, STARTED, PAUSED, ENDED, FINISHED
 	}
-	enum Direction: String, CaseIterable {
-		case UP, DOWN, RIGHT, LEFT
-	}
 	
 	private var sceneLoaded = false
 	
@@ -109,8 +106,8 @@ class GameScene: BaseScene {
 	override func sceneDidLoad() {
 		super.sceneDidLoad()
 		
-		initFX("sceneDidLoad")
 		initObjects("sceneDidLoad")
+		initFX("sceneDidLoad")
 		
 		loadGame("sceneDidLoad")
 	}
@@ -118,6 +115,13 @@ class GameScene: BaseScene {
 	override func didMove(to view: SKView) {
 		super.didMove(to: view)
 		
+		// iOS: scene size does not change after moved to view
+		// let viewSizeAspect = view.frame.height / view.frame.width
+		// if (1.3 < viewSizeAspect && viewSizeAspect < 2.2) {
+		//		scaleMode = .resizeFill
+		// }
+		scaleMode = .aspectFit
+
 		resizeScene("didMove")
 		// sceneStartEffect("didMove")
 		
@@ -126,13 +130,12 @@ class GameScene: BaseScene {
 		
 		sceneLoaded = true
 		
-		NotificationCenter.default.post(name: .levelEntered, object: gameNo)
+		NotificationCenter.default.post(name: .gameEntered, object: gameNo)
 	}
 	
 	override func didChangeSize(_ oldSize: CGSize) {
 		super.didChangeSize(oldSize)
 		
-		scaleMode = .aspectFit
 		if sceneLoaded { resizeScene("didChangeSize") }
 	}
 	
@@ -164,23 +167,6 @@ class GameScene: BaseScene {
 		}
 		
 		self.lastUpdateTime = currentTime
-	}
-	
-	private func initFX(_ tag: String) {
-		if !sounds.isEmpty { fatalError("!-  already init FX") }
-		
-		sounds += [flapSound, hitSound, dieSound, scoringSound]
-		
-		let vol = Helper.soundVolume
-		sounds.forEach {
-			$0.autoplayLooped = false
-			$0.run(SKAction.changeVolume(to: vol, duration: 0))
-			addChild($0)
-		}
-		
-		let style: UIImpactFeedbackGenerator.FeedbackStyle
-		if #available(iOS 13.0, *) { style = .soft } else { style = .light }
-		impactFeedbackGenerator = UIImpactFeedbackGenerator(style: style)
 	}
 	
 	private func initObjects(_ tag: String) {
@@ -224,10 +210,31 @@ class GameScene: BaseScene {
 		flash.alpha = 0.7
 		flash.isHidden = true
 		
+		groundObstacleTemp1.name = "ground-pipe-1"
 		groundObstacleTemp1.texture!.filteringMode = .nearest
+		groundObstacleTemp2.name = "ground-pipe-2"
 		groundObstacleTemp2.texture!.filteringMode = .nearest
+		skyObstacleTemp1.name = "sky-pipe-1"
 		skyObstacleTemp1.texture!.filteringMode = .nearest
+		skyObstacleTemp2.name = "sky-pipe-2"
 		skyObstacleTemp2.texture!.filteringMode = .nearest
+	}
+	
+	private func initFX(_ tag: String) {
+		if !sounds.isEmpty { fatalError("!-  already init FX") }
+		
+		sounds += [flapSound, hitSound, dieSound, scoringSound]
+		
+		let vol = Helper.soundVolume
+		sounds.forEach {
+			$0.autoplayLooped = false
+			$0.run(SKAction.changeVolume(to: vol, duration: 0))
+			addChild($0)
+		}
+		
+		let style: UIImpactFeedbackGenerator.FeedbackStyle
+		if #available(iOS 13.0, *) { style = .soft } else { style = .light }
+		impactFeedbackGenerator = UIImpactFeedbackGenerator(style: style)
 	}
 	
 	private func loadGame(_ tag: String) {
@@ -241,7 +248,7 @@ class GameScene: BaseScene {
 	}
 	
 	private func resizeScene(_ tag: String) {
-		NSLog("--  \(TAG) | resizeScene [\(tag)]: \(frame)")
+		NSLog("--  \(TAG) | resizeScene [\(tag)]: \(frame) | \(scaleMode.rawValue)")
 		
 		// Bird
 		let mainCharTextureSize = mainCharacter.texture!.size()
@@ -257,8 +264,10 @@ class GameScene: BaseScene {
 		mainCharacter.physicsBody!.collisionBitMask = groundCategory | pipeCategory
 		mainCharacter.physicsBody!.contactTestBitMask = groundCategory | pipeCategory
 		
-		let hop = SKAction.moveBy(x: 0, y: mainCharacter.size.height * 0.5, duration: 0.3)
-		mainCharacter.run(SKAction.repeatForever(SKAction.sequence([hop, hop.reversed()])), withKey: "hop")
+		if gameState == .PREPARED {
+			let hop = SKAction.moveBy(x: 0, y: mainCharacter.size.height * 0.5, duration: 0.3)
+			mainCharacter.run(SKAction.repeatForever(SKAction.sequence([hop, hop.reversed()])), withKey: "hop")
+		}
 		
 		MAIN_CHARACTER_HEIGHT = mainCharacter.size.height
 		let MAIN_CHARACTER_WIDTH = mainCharacter.size.width
@@ -287,7 +296,7 @@ class GameScene: BaseScene {
 		let resetBg = SKAction.moveBy(x: bgWidth, y: 0, duration: 0.0)
 		let moveBgsForever = SKAction.repeatForever(SKAction.sequence([moveBg, resetBg]))
 		
-		for i in 0 ..< 2 + Int(self.frame.width / ( bgTexture.size().width * 2 )) {
+		for i in 0 ..< 2 + Int(self.frame.width / bgWidth) {
 			let node = SKSpriteNode(texture: bgTexture)
 			
 			node.size = CGSize(width: bgWidth + 1, height: bgHeight)
@@ -317,7 +326,7 @@ class GameScene: BaseScene {
 		let resetGround = SKAction.moveBy(x: groundWidth, y: 0, duration: 0.0)
 		let moveGroundsForever = SKAction.repeatForever(SKAction.sequence([moveGround, resetGround]))
 		
-		for i in 0 ... 1 + Int(self.frame.height / groundWidth) {
+		for i in 0 ... 1 + Int(self.frame.width / groundWidth) {
 			let ground = SKSpriteNode(texture: groundTexture)
 			ground.name = "ground"
 			ground.size = CGSize(width: groundWidth + 1, height: groundHeight)
@@ -328,7 +337,6 @@ class GameScene: BaseScene {
 			ground.physicsBody!.categoryBitMask = groundCategory
 			//ground.physicsBody!.collisionBitMask = collisionCategory
 			//ground.physicsBody!.contactTestBitMask = collisionCategory
-			
 			ground.run(moveGroundsForever)
 			
 			grounds.addChild(ground)
@@ -345,16 +353,12 @@ class GameScene: BaseScene {
 		
 		// Pipes
 		let groundPipeTexture1Size = groundObstacleTemp1.texture!.size()
-		groundObstacleTemp1.name = "ground-pipe-1"
 		groundObstacleTemp1.size = CGSize(width: PIPE_WIDTH, height: PIPE_WIDTH * groundPipeTexture1Size.height / groundPipeTexture1Size.width)
 		let groundPipeTexture2Size = groundObstacleTemp2.texture!.size()
-		groundObstacleTemp2.name = "ground-pipe-2"
 		groundObstacleTemp2.size = CGSize(width: PIPE_WIDTH, height: PIPE_WIDTH * groundPipeTexture2Size.height / groundPipeTexture2Size.width)
 		let skyPipeTexture1Size = skyObstacleTemp1.texture!.size()
-		skyObstacleTemp1.name = "sky-pipe-1"
 		skyObstacleTemp1.size = CGSize(width: PIPE_WIDTH, height: PIPE_WIDTH * skyPipeTexture1Size.height / skyPipeTexture1Size.width)
 		let skyPipeTexture2Size = skyObstacleTemp2.texture!.size()
-		skyObstacleTemp2.name = "sky-pipe-2"
 		skyObstacleTemp2.size = CGSize(width: PIPE_WIDTH, height: PIPE_WIDTH * skyPipeTexture2Size.height / skyPipeTexture2Size.width)
 		
 		let spawnThenDelayForever = SKAction.repeatForever(SKAction.sequence([
@@ -507,7 +511,8 @@ class GameScene: BaseScene {
 		NSLog("--  \(TAG) | endGame [\(tag)]")
 		
 		gameState = .ENDED
-		setUserInteraction(false)
+		setUserInteraction("endGame", false)
+		root.isUserInteractionEnabled = false
 		
 		vibrate(impactFeedbackGenerator)
 		playSound(hitSound)
@@ -550,7 +555,7 @@ class GameScene: BaseScene {
 			
 			self!.stateMachine.enter(LevelSceneFinishState.self)
 			
-			NotificationCenter.default.post(name: .levelFinished, object: self!.gameNo)
+			NotificationCenter.default.post(name: .gameFinished, object: self!.gameNo)
 			
 			self!.endGameAction?(self!.score)
 		}
