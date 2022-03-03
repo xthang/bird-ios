@@ -18,7 +18,7 @@ class AppDelegate: BaseAppDelegate {
 	
 	
 	override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-		Helper.appHelper = AppHelper.self
+		// Helper.appHelper = AppHelper.self
 		
 		let x = super.application(application, didFinishLaunchingWithOptions: launchOptions)
 		

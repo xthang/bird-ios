@@ -40,17 +40,67 @@ class GameViewController: UIViewController {
 		NSLog("--  \(TAG) | viewDidLoad: \(hash)")
 		super.viewDidLoad()
 		
+		//
+		NotificationCenter.default.addObserver(self, selector: #selector(self.adsStatusChanged(_:)), name: .AdsStatusChanged, object: nil)
+		
+		NotificationCenter.default.addObserver(self, selector: #selector(self.homeEntered), name: .homeEntered, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(self.gameEntered), name: .gameEntered, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(self.gameFinished), name: .gameFinished, object: nil)
+		
+		//
+		skView.ignoresSiblingOrder = true
+			 
+#if DEBUG
+			 //skView.showsFPS = true
+			 //skView.showsDrawCount = true
+			 //skView.showsNodeCount = true
+			 //skView.showsQuadCount = true
+			 //skView.showsPhysics = true
+			 //skView.showsFields = true
+			 //if #available(iOS 13.0, *) {
+			 //	skView.showsLargeContentViewer = true
+			 //}
+#endif
+		
+		//
+		SceneManager.prepareScene(.game)
+	}
+	
+	override func viewDidAppear(_ animated: Bool) {
+		NSLog("--  \(TAG) | viewDidAppear: \(hash) - animated: \(animated)")
+		super.viewDidAppear(animated)
+		
+		if #available(iOS 13.0, *) {
+			NotificationCenter.default.removeObserver(self, name: UIScene.willDeactivateNotification, object: view.window!.windowScene!)
+			NotificationCenter.default.removeObserver(self, name: UIScene.didActivateNotification, object: view.window!.windowScene!)
+			NotificationCenter.default.addObserver(self, selector: #selector(self.deactivate), name: UIScene.willDeactivateNotification, object: view.window!.windowScene!)
+			NotificationCenter.default.addObserver(self, selector: #selector(self.activate), name: UIScene.didActivateNotification, object: view.window!.windowScene!)
+		} else {
+			NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
+			NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
+			NotificationCenter.default.addObserver(self, selector: #selector(self.deactivate), name: UIApplication.willResignActiveNotification, object: nil)
+			NotificationCenter.default.addObserver(self, selector: #selector(self.activate), name: UIApplication.didBecomeActiveNotification, object: nil)
+		}
+		
 		if UserDefaults.standard.object(forKey: CommonConfig.Keys.welcomeVersion) == nil {
 			showWelcome()
 		} else {
 			loadScene("viewDidLoad")
 		}
 		
-		NotificationCenter.default.addObserver(self, selector: #selector(self.adsStatusChanged(_:)), name: .AdsStatusChanged, object: nil)
+		if #available(iOS 13.0, *) {
+			self.adBanner = (view.window!.windowScene!.delegate as? SceneDelegate)?.adBanner ?? ADBanner.shared
+			self.adInterstitial = (view.window!.windowScene!.delegate as? SceneDelegate)?.adInterstitial ?? AdInterstitial.shared
+		} else {
+			self.adBanner = ADBanner.shared
+			self.adInterstitial = AdInterstitial.shared
+		}
 		
-		NotificationCenter.default.addObserver(self, selector: #selector(self.homeEntered), name: .homeEntered, object: nil)
-		NotificationCenter.default.addObserver(self, selector: #selector(self.gameEntered), name: .gameEntered, object: nil)
-		NotificationCenter.default.addObserver(self, selector: #selector(self.gameFinished), name: .gameFinished, object: nil)
+		// for the first time run, HomeScene can not post Notification.homeEntered
+		if isFirstLoad && UserDefaults.standard.object(forKey: CommonConfig.Keys.welcomeVersion) != nil {
+			isFirstLoad = false
+			checkAndUpdateAdsBanner("viewDidAppear", !Helper.adsRemoved, position: .top)
+		}
 	}
 	
 	private func showWelcome() {
@@ -78,20 +128,10 @@ class GameViewController: UIViewController {
 				// Set the scale mode to scale to fit the window
 				// sceneNode.scaleMode = .resizeFill
 				
+				sceneNode.willMove("\(TAG)|loadScene|\(tag)", to: skView)
+				
 				// Present the scene
 				skView.presentScene(sceneNode)
-				
-				skView.ignoresSiblingOrder = true
-				
-				//skView.showsFPS = true
-				//skView.showsDrawCount = true
-				//skView.showsNodeCount = true
-				//skView.showsQuadCount = true
-				//skView.showsPhysics = true
-				//skView.showsFields = true
-				//if #available(iOS 13.0, *) {
-				//	skView.showsLargeContentViewer = true
-				//}
 			}
 		}
 		
@@ -118,37 +158,6 @@ class GameViewController: UIViewController {
 		GameCenterHelper.authenticateLocalPlayer(TAG, self)
 		
 		// rewardDaily("loadScene|\(tag)")
-	}
-	
-	override func viewDidAppear(_ animated: Bool) {
-		NSLog("--  \(TAG) | viewDidAppear: \(hash) - animated: \(animated)")
-		super.viewDidAppear(animated)
-		
-		if #available(iOS 13.0, *) {
-			NotificationCenter.default.removeObserver(self, name: UIScene.willDeactivateNotification, object: view.window!.windowScene!)
-			NotificationCenter.default.removeObserver(self, name: UIScene.didActivateNotification, object: view.window!.windowScene!)
-			NotificationCenter.default.addObserver(self, selector: #selector(self.deactivate), name: UIScene.willDeactivateNotification, object: view.window!.windowScene!)
-			NotificationCenter.default.addObserver(self, selector: #selector(self.activate), name: UIScene.didActivateNotification, object: view.window!.windowScene!)
-		} else {
-			NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
-			NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
-			NotificationCenter.default.addObserver(self, selector: #selector(self.deactivate), name: UIApplication.willResignActiveNotification, object: nil)
-			NotificationCenter.default.addObserver(self, selector: #selector(self.activate), name: UIApplication.didBecomeActiveNotification, object: nil)
-		}
-		
-		if #available(iOS 13.0, *) {
-			self.adBanner = (view.window!.windowScene!.delegate as? SceneDelegate)?.adBanner ?? ADBanner.shared
-			self.adInterstitial = (view.window!.windowScene!.delegate as? SceneDelegate)?.adInterstitial ?? AdInterstitial.shared
-		} else {
-			self.adBanner = ADBanner.shared
-			self.adInterstitial = AdInterstitial.shared
-		}
-		
-		// for the first time run, HomeScene can not post Notification.homeEntered
-		if isFirstLoad && UserDefaults.standard.object(forKey: CommonConfig.Keys.welcomeVersion) != nil {
-			isFirstLoad = false
-			checkAndUpdateAdsBanner("viewDidAppear", !Helper.adsRemoved, position: .top)
-		}
 	}
 	
 	override func viewWillTransition(to size: CGSize,
@@ -187,7 +196,7 @@ class GameViewController: UIViewController {
 	override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
 		super.pressesBegan(presses, with: event)
 		
-		skView.scene?.pressesDidBegin(presses, with: event)
+		skView.scene?.pressesDidBegin(TAG, presses, with: event)
 	}
 	
 	private func updateAdsBanner(_ tag: String, _ on: Bool, position: BannerPosition? = nil) {

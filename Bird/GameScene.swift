@@ -229,7 +229,7 @@ class GameScene: BaseScene {
 		sounds.forEach {
 			$0.autoplayLooped = false
 			$0.run(SKAction.changeVolume(to: vol, duration: 0))
-			addChild($0)
+			root.addChild($0)
 		}
 		
 		let style: UIImpactFeedbackGenerator.FeedbackStyle
@@ -262,7 +262,7 @@ class GameScene: BaseScene {
 		
 		mainCharacter.physicsBody!.categoryBitMask = birdCategory
 		mainCharacter.physicsBody!.collisionBitMask = groundCategory | pipeCategory
-		mainCharacter.physicsBody!.contactTestBitMask = groundCategory | pipeCategory
+		mainCharacter.physicsBody!.contactTestBitMask = groundCategory | pipeCategory | scoreCategory
 		
 		if gameState == .PREPARED {
 			let hop = SKAction.moveBy(x: 0, y: mainCharacter.size.height * 0.5, duration: 0.3)
@@ -432,7 +432,7 @@ class GameScene: BaseScene {
 		contactNode.physicsBody = SKPhysicsBody(rectangleOf: CGSize( width: 1, height: self.frame.height ))
 		contactNode.physicsBody!.isDynamic = false
 		contactNode.physicsBody!.categoryBitMask = scoreCategory
-		contactNode.physicsBody!.contactTestBitMask = birdCategory
+		// contactNode.physicsBody!.contactTestBitMask = birdCategory
 		pipePair.addChild(contactNode)
 		
 		pipePair.run(movePipesAndRemove)
@@ -478,7 +478,7 @@ class GameScene: BaseScene {
 		processInput("touch")
 	}
 	
-	override func pressesDidBegin(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+	override func pressesDidBegin(_ tag: String, _ presses: Set<UIPress>, with event: UIPressesEvent?) {
 		// NSLog("--  \(TAG) | pressesDidBegin: \(presses.map { p in p.key?.charactersIgnoringModifiers })")
 		
 		guard let _ = presses.first?.key else { return }

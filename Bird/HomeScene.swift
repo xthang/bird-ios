@@ -48,8 +48,6 @@ class HomeScene: BaseScene {
 		sceneLoaded = true
 		
 		NotificationCenter.default.post(name: .homeEntered, object: nil)
-		
-		SceneManager.prepareScene(.game)
 	}
 	
 	override func didChangeSize(_ oldSize: CGSize) {
@@ -72,6 +70,8 @@ class HomeScene: BaseScene {
 		mainCharacter.run(flap, withKey: "flap")
 		
 		title.texture!.filteringMode = .nearest
+		
+		copyright.zPosition = GameLayer.navigation.rawValue
 		
 		buttons.zPosition = GameLayer.navigation.rawValue
 		buttons.children.forEach {
@@ -158,7 +158,6 @@ class HomeScene: BaseScene {
 		
 		copyright.fontSize = min(frame.height * 0.025, frame.width * 0.04)
 		copyright.position.y = grounds.children.first!.frame.maxY - grounds.children.first!.frame.height * 0.35
-		copyright.zPosition = GameLayer.navigation.rawValue
 		
 		[btnPlay, btnLeaderboards].forEach { b in
 			let btnTextureSize = b.imgNode!.texture!.size()

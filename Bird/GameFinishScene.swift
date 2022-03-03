@@ -29,7 +29,7 @@ class GameFinishScene: SceneOverlay {
 	private lazy var bestScoreLabel = scorePanel.childNode(withName: "BestScore") as! SKLabelNode2
 	private lazy var newLabel = scorePanel.childNode(withName: "New") as! SKSpriteNode
 	private lazy var medal = scorePanel.childNode(withName: "Medal") as! SKSpriteNode
-	private var twinkles = SKNode()
+	private let twinkles = SKNode()
 	
 	private lazy var buttons = childNode(withName: "Buttons")!
 	private lazy var btnNewGame = buttons.childNode(withName: ButtonIdentifier.play.rawValue) as! ButtonNode

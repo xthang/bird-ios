@@ -207,10 +207,10 @@
 				B569AFA6277AAA290057B873 /* LaunchScreen.storyboard */,
 				B569AFA1277AAA270057B873 /* Main.storyboard */,
 				B569AF9F277AAA270057B873 /* GameViewController.swift */,
-				B569AFE3277AB0CF0057B873 /* About.swift */,
-				B569AFE4277AB0CF0057B873 /* About.xib */,
 				B569AFE1277AB0CE0057B873 /* DEV.swift */,
 				B569AFE0277AB0CE0057B873 /* DEV.xib */,
+				B569AFE3277AB0CF0057B873 /* About.swift */,
+				B569AFE4277AB0CF0057B873 /* About.xib */,
 				B569AFE2277AB0CE0057B873 /* Welcome.xib */,
 				B569AFE5277AB0CF0057B873 /* WelcomeView.swift */,
 				B569AFFB277AB2740057B873 /* SceneManager.swift */,
@@ -441,32 +441,32 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5BFC0C52782A88600F831A4 /* GamePauseScene.sks in Resources */,
 				B569AFCF277AAF0A0057B873 /* AppConfig.plist in Resources */,
-				B569AFEA277AB0CF0057B873 /* About.xib in Resources */,
-				B569B035277AB8F90057B873 /* coin-added.wav in Resources */,
-				B569AFA3277AAA270057B873 /* Main.storyboard in Resources */,
-				B569B034277AB8F90057B873 /* hint.wav in Resources */,
-				B569B02C277AB8F90057B873 /* GameScene.sks in Resources */,
-				B569AFA5277AAA290057B873 /* Assets.xcassets in Resources */,
-				B57E7983277F01EC0071F4DA /* sfx_point.wav in Resources */,
-				B569AFE8277AB0CF0057B873 /* Welcome.xib in Resources */,
-				B569AFE6277AB0CF0057B873 /* DEV.xib in Resources */,
-				B569AFD5277AAFA40057B873 /* Products.plist in Resources */,
-				B5BFC0C3278291AE00F831A4 /* GameFinishScene.sks in Resources */,
-				B57E7984277F01EC0071F4DA /* sfx_die.wav in Resources */,
-				B5F9C61327859D9700A1619C /* 6pxbus.ttf in Resources */,
-				B569B033277AB8F90057B873 /* button.wav in Resources */,
-				B569B02A277AB8F90057B873 /* HomeScene.sks in Resources */,
-				B57E7982277F01EC0071F4DA /* sfx_wing.wav in Resources */,
 				B569AFD3277AAF8E0057B873 /* theme-light.plist in Resources */,
+				B569AFD5277AAFA40057B873 /* Products.plist in Resources */,
+				B569AFD1277AAF600057B873 /* Settings.bundle in Resources */,
+				B569AFA5277AAA290057B873 /* Assets.xcassets in Resources */,
+				B569B035277AB8F90057B873 /* coin-added.wav in Resources */,
+				B569B034277AB8F90057B873 /* hint.wav in Resources */,
+				B57E7983277F01EC0071F4DA /* sfx_point.wav in Resources */,
+				B57E7984277F01EC0071F4DA /* sfx_die.wav in Resources */,
+				B569B033277AB8F90057B873 /* button.wav in Resources */,
+				B57E7982277F01EC0071F4DA /* sfx_wing.wav in Resources */,
 				B569B032277AB8F90057B873 /* whoosh.wav in Resources */,
 				B57E7980277F01EC0071F4DA /* sfx_hit.wav in Resources */,
 				B569B036277AB8F90057B873 /* pop.wav in Resources */,
+				B57E7981277F01EC0071F4DA /* sfx_swooshing.wav in Resources */,
+				B5F9C61327859D9700A1619C /* 6pxbus.ttf in Resources */,
 				B569B029277AB8F90057B873 /* about.html in Resources */,
 				B569AFA8277AAA290057B873 /* LaunchScreen.storyboard in Resources */,
-				B57E7981277F01EC0071F4DA /* sfx_swooshing.wav in Resources */,
-				B569AFD1277AAF600057B873 /* Settings.bundle in Resources */,
+				B569AFA3277AAA270057B873 /* Main.storyboard in Resources */,
+				B569AFE8277AB0CF0057B873 /* Welcome.xib in Resources */,
+				B569AFE6277AB0CF0057B873 /* DEV.xib in Resources */,
+				B569AFEA277AB0CF0057B873 /* About.xib in Resources */,
+				B569B02A277AB8F90057B873 /* HomeScene.sks in Resources */,
+				B569B02C277AB8F90057B873 /* GameScene.sks in Resources */,
+				B5BFC0C52782A88600F831A4 /* GamePauseScene.sks in Resources */,
+				B5BFC0C3278291AE00F831A4 /* GameFinishScene.sks in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -700,14 +700,15 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Bird/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Flappy Bird";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow app to save images to Photo Library";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UIRequiresFullScreen = NO;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeRight UIInterfaceOrientationLandscapeLeft";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeRight UIInterfaceOrientationLandscapeLeft";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -735,14 +736,15 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Bird/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Flappy Bird";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow app to save images to Photo Library";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UIRequiresFullScreen = NO;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeRight UIInterfaceOrientationLandscapeLeft";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeRight UIInterfaceOrientationLandscapeLeft";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
