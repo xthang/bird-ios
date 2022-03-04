@@ -22,8 +22,6 @@
 		B569AFD3277AAF8E0057B873 /* theme-light.plist in Resources */ = {isa = PBXBuildFile; fileRef = B569AFD2277AAF8E0057B873 /* theme-light.plist */; };
 		B569AFD5277AAFA40057B873 /* Products.plist in Resources */ = {isa = PBXBuildFile; fileRef = B569AFD4277AAFA40057B873 /* Products.plist */; };
 		B569AFDF277AB0A20057B873 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B569AFDE277AB0A20057B873 /* SceneDelegate.swift */; };
-		B569AFE6277AB0CF0057B873 /* DEV.xib in Resources */ = {isa = PBXBuildFile; fileRef = B569AFE0277AB0CE0057B873 /* DEV.xib */; };
-		B569AFE7277AB0CF0057B873 /* DEV.swift in Sources */ = {isa = PBXBuildFile; fileRef = B569AFE1277AB0CE0057B873 /* DEV.swift */; };
 		B569AFE8277AB0CF0057B873 /* Welcome.xib in Resources */ = {isa = PBXBuildFile; fileRef = B569AFE2277AB0CE0057B873 /* Welcome.xib */; };
 		B569AFE9277AB0CF0057B873 /* About.swift in Sources */ = {isa = PBXBuildFile; fileRef = B569AFE3277AB0CF0057B873 /* About.swift */; };
 		B569AFEA277AB0CF0057B873 /* About.xib in Resources */ = {isa = PBXBuildFile; fileRef = B569AFE4277AB0CF0057B873 /* About.xib */; };
@@ -100,8 +98,6 @@
 		B569AFD2277AAF8E0057B873 /* theme-light.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "theme-light.plist"; sourceTree = "<group>"; };
 		B569AFD4277AAFA40057B873 /* Products.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Products.plist; sourceTree = "<group>"; };
 		B569AFDE277AB0A20057B873 /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		B569AFE0277AB0CE0057B873 /* DEV.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DEV.xib; sourceTree = "<group>"; };
-		B569AFE1277AB0CE0057B873 /* DEV.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DEV.swift; sourceTree = "<group>"; };
 		B569AFE2277AB0CE0057B873 /* Welcome.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Welcome.xib; sourceTree = "<group>"; };
 		B569AFE3277AB0CF0057B873 /* About.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = About.swift; sourceTree = "<group>"; };
 		B569AFE4277AB0CF0057B873 /* About.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = About.xib; sourceTree = "<group>"; };
@@ -207,17 +203,11 @@
 				B569AFA6277AAA290057B873 /* LaunchScreen.storyboard */,
 				B569AFA1277AAA270057B873 /* Main.storyboard */,
 				B569AF9F277AAA270057B873 /* GameViewController.swift */,
-				B569AFE1277AB0CE0057B873 /* DEV.swift */,
-				B569AFE0277AB0CE0057B873 /* DEV.xib */,
 				B569AFE3277AB0CF0057B873 /* About.swift */,
 				B569AFE4277AB0CF0057B873 /* About.xib */,
 				B569AFE2277AB0CE0057B873 /* Welcome.xib */,
 				B569AFE5277AB0CF0057B873 /* WelcomeView.swift */,
 				B569AFFB277AB2740057B873 /* SceneManager.swift */,
-				B569AF9D277AAA270057B873 /* HomeScene.swift */,
-				B569AFF7277AB21D0057B873 /* GameScene.swift */,
-				B55B35E62782BE1A00CFAD15 /* GamePauseScene.swift */,
-				B569AFEC277AB0E90057B873 /* GameFinishScene.swift */,
 				B569B00D277AB8F90057B873 /* Scenes */,
 				B569B03D277AFD830057B873 /* Nodes */,
 				B569B005277AB8F90057B873 /* GameLevel States */,
@@ -294,9 +284,13 @@
 		B569B00D277AB8F90057B873 /* Scenes */ = {
 			isa = PBXGroup;
 			children = (
+				B569AF9D277AAA270057B873 /* HomeScene.swift */,
 				B569B00E277AB8F90057B873 /* HomeScene.sks */,
+				B569AFF7277AB21D0057B873 /* GameScene.swift */,
 				B569B010277AB8F90057B873 /* GameScene.sks */,
+				B55B35E62782BE1A00CFAD15 /* GamePauseScene.swift */,
 				B5BFC0C42782A88600F831A4 /* GamePauseScene.sks */,
+				B569AFEC277AB0E90057B873 /* GameFinishScene.swift */,
 				B5BFC0C2278291AE00F831A4 /* GameFinishScene.sks */,
 			);
 			path = Scenes;
@@ -461,7 +455,6 @@
 				B569AFA8277AAA290057B873 /* LaunchScreen.storyboard in Resources */,
 				B569AFA3277AAA270057B873 /* Main.storyboard in Resources */,
 				B569AFE8277AB0CF0057B873 /* Welcome.xib in Resources */,
-				B569AFE6277AB0CF0057B873 /* DEV.xib in Resources */,
 				B569AFEA277AB0CF0057B873 /* About.xib in Resources */,
 				B569B02A277AB8F90057B873 /* HomeScene.sks in Resources */,
 				B569B02C277AB8F90057B873 /* GameScene.sks in Resources */,
@@ -505,7 +498,6 @@
 				B569AFED277AB0E90057B873 /* GameFinishScene.swift in Sources */,
 				B569AFDF277AB0A20057B873 /* SceneDelegate.swift in Sources */,
 				B55B35E72782BE1B00CFAD15 /* GamePauseScene.swift in Sources */,
-				B569AFE7277AB0CF0057B873 /* DEV.swift in Sources */,
 				B569AFFA277AB21D0057B873 /* GameScene.swift in Sources */,
 				B569B01F277AB8F90057B873 /* Extensions.swift in Sources */,
 				B569B025277AB8F90057B873 /* LevelScenePauseState.swift in Sources */,

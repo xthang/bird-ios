@@ -6,15 +6,13 @@ import UIKit
 
 import XLibrary
 
-class WelcomeView: OverlayView {
+class WelcomeView: BaseWelcomeView {
 	
 	private let TAG = "WC"
 	
 	@IBOutlet private weak var collectionView: UICollectionView!
 	@IBOutlet private weak var pageControl: UIPageControl!
 	@IBOutlet private var pages: [UIView]!
-	
-	private var completion: (() -> Void)?
 	
 	override func awakeFromNib() {
 		super.awakeFromNib()
@@ -46,19 +44,9 @@ class WelcomeView: OverlayView {
 		pageChanged(pageControl)
 	}
 	
-	public func onCompletion(completion: @escaping () -> Void) {
-		self.completion = completion
-	}
-	
 	@IBAction func pageChanged(_ sender: UIPageControl) {
 		collectionView.scrollToItem(at: IndexPath(item: sender.currentPage, section: 0),
 											 at: .centeredHorizontally, animated: true)
-	}
-	
-	@IBAction func getStartedButtonTapped(_ sender: UIButton) {
-		self.removeFromSuperview()
-		UserDefaults.standard.setValue(Helper.appVersion, forKey: CommonConfig.Keys.welcomeVersion)
-		completion?()
 	}
 }
 

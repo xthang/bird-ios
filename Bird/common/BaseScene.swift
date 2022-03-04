@@ -19,17 +19,10 @@ class BaseScene: BaseSKScene, ButtonResponder {
 				overlays.forEach { $0.removeFromSuperview() }	// TODO
 				
 				let scene = HomeScene(fileNamed: "HomeScene")!
-				view?.presentScene(scene, transition: .doorsOpenVertical(withDuration: 0.5))
+				view?.presentScene("\(TAG)|buttonTriggered", scene, transition: .doorsOpenVertical(withDuration: 0.5))
 			case .play, .replay:
 				let scene = GameScene(fileNamed: "GameScene")!
-				let viewSizeAspect = view!.frame.height / view!.frame.width
-				if 1.3 < viewSizeAspect && viewSizeAspect < 2.2 {
-					scene.scaleMode = .resizeFill
-				} else {
-					scene.scaleMode = .aspectFit
-				}
-				
-				view!.presentScene(scene, transition: .doorsOpenHorizontal(withDuration: 0.5))
+				view!.presentScene("\(TAG)|buttonTriggered", scene, transition: .doorsOpenHorizontal(withDuration: 0.5))
 			case .pause:
 				pause("buttonTriggered")
 			case .resume:

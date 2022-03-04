@@ -112,6 +112,15 @@ class GameScene: BaseScene {
 		loadGame("sceneDidLoad")
 	}
 	
+	override func willMove(_ tag: String, to view: SKView) {
+		let viewSizeAspect = view.frame.height / view.frame.width
+		if 1.3 < viewSizeAspect && viewSizeAspect < 2.2 {
+			scaleMode = .resizeFill
+		} else {
+			scaleMode = .aspectFit
+		}
+	}
+	
 	override func didMove(to view: SKView) {
 		super.didMove(to: view)
 		
